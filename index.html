@@ -30,10 +30,9 @@
 
       <div class="nav-menu" id="site-menu">
         <div class="nav-links">
-          <a href="#overview">Overview</a>
+          <a href="#highlights">Overview</a>
           <a href="#method">Method</a>
           <a href="#results">Results</a>
-          <a href="#citation">Citation</a>
         </div>
         <a class="nav-paper" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer">Read paper</a>
       </div>
@@ -50,9 +49,6 @@
       <a href="#deployment">Deployment</a>
       <a href="#results">Policy Results</a>
       <a href="#data-efficiency">Data Efficiency</a>
-      <a href="#overview">Core Idea</a>
-      <a href="#takeaway">Takeaway</a>
-      <a href="#citation">Citation</a>
     </nav>
   </aside>
 
@@ -378,108 +374,7 @@
         <p class="data-efficiency-note"><strong>50% fewer robot demonstrations.</strong> With 25 robot demonstrations, human-assisted training approaches or matches the 50-demo Robot-only reference across the evaluated tasks.</p>
       </div>
     </section>
-
-    <div class="research-marquee" aria-hidden="true">
-      <div class="research-marquee-track">
-        <span>Continuous · Coupled · Fine-Grained · Human-to-Robot ·</span>
-        <span>Continuous · Coupled · Fine-Grained · Human-to-Robot ·</span>
-      </div>
-    </div>
-
-    <section class="proof-band" aria-label="Key results">
-      <div class="shell proof-grid">
-        <article class="proof-item reveal">
-          <span class="proof-value">29→56<small>%</small></span>
-          <p>Average success<br>on GR00T N1.7</p>
-        </article>
-        <article class="proof-item reveal">
-          <span class="proof-value">32→57<small>%</small></span>
-          <p>Average success<br>on π<sub>0.5</sub></p>
-        </article>
-        <article class="proof-item reveal">
-          <span class="proof-value">½</span>
-          <p>Robot demonstrations<br>for matched performance</p>
-        </article>
-        <article class="proof-item reveal">
-          <span class="proof-value">15/15</span>
-          <p>Transferred trajectories<br>replayed successfully</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section intro-section" id="overview" aria-labelledby="overview-title">
-      <div class="shell section-heading reveal">
-        <p class="eyebrow">01 · The idea</p>
-        <h2 id="overview-title">Preserve the motion.<br><em>Remove the mismatch.</em></h2>
-      </div>
-
-      <div class="shell intro-grid">
-        <div class="intro-thesis reveal">
-          <p class="lead">Whole-body manipulation is not a sequence of isolated skills. The base, torso, head, arms, and dexterous hands have to negotiate every moment together.</p>
-          <p>DexRoam turns portable human demonstrations into robot-compatible supervision while keeping that coordination continuous. Human and robot trajectories then train a standard vision-language-action policy through the same action interface.</p>
-        </div>
-
-        <ul class="principles reveal">
-          <li>
-            <span class="principle-number">01</span>
-            <div><h3>Continuous actions</h3><p>No discretized locomotion primitives.</p></div>
-          </li>
-          <li>
-            <span class="principle-number">02</span>
-            <div><h3>Continuous prediction</h3><p>No phase switching at deployment.</p></div>
-          </li>
-          <li>
-            <span class="principle-number">03</span>
-            <div><h3>Coupled whole body</h3><p>One unified policy output space.</p></div>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="section takeaway-section" id="takeaway" aria-labelledby="takeaway-title">
-      <div class="shell takeaway reveal">
-        <p class="eyebrow">The takeaway</p>
-        <h2 id="takeaway-title">Human data does not replace robot data.<br><em>It makes every robot demonstration go further.</em></h2>
-        <a class="button button-light" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer">Read the full paper</a>
-      </div>
-    </section>
-
-    <section class="section citation-section" id="citation" aria-labelledby="citation-title">
-      <div class="shell citation-layout">
-        <div class="citation-copy reveal">
-          <p class="eyebrow">04 · Citation</p>
-          <h2 id="citation-title">Build on<br><em>DexRoam.</em></h2>
-          <p>If this work helps your research, please cite the paper. This temporary entry uses the metadata currently available in the draft.</p>
-        </div>
-
-        <div class="citation-code reveal">
-          <div class="code-toolbar">
-            <span>BibTeX</span>
-            <button type="button" data-copy-citation>Copy citation</button>
-          </div>
-          <pre><code id="bibtex">@misc{zhou2026dexroam,
-  title  = {DexRoam: Learning Mobile Bimanual
-            Dexterous Manipulation from Egocentric
-            Whole-Body Human Demonstrations},
-  author = {Zhou, Rui and Yuan, Yibo and Zhao, Junkai
-            and Zhao, Fangyuan and Zhao, Xiaoguang
-            and Zhang, Shanghang and Han, Sirui},
-  year   = {2026},
-  url    = {https://dexroam.github.io/}
-}</code></pre>
-          <p class="copy-status" role="status" aria-live="polite" data-copy-status></p>
-        </div>
-      </div>
-    </section>
   </main>
-
-  <footer class="site-footer">
-    <div class="shell footer-row">
-      <a class="brand" href="#top"><span class="brand-word">DexRoam</span><span class="brand-index">01</span></a>
-      <p>Continuous · Coupled · Fine-grained</p>
-      <p>© 2026 DexRoam</p>
-    </div>
-  </footer>
 
 </body>
 </html>

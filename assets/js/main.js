@@ -486,23 +486,4 @@
     });
   }
 
-  const copyButton = $('[data-copy-citation]');
-  const copyStatus = $('[data-copy-status]');
-  copyButton.addEventListener('click', async () => {
-    const citation = $('#bibtex').textContent;
-    try {
-      await navigator.clipboard.writeText(citation);
-      copyButton.textContent = 'Copied';
-      copyStatus.textContent = 'BibTeX copied to your clipboard.';
-    } catch {
-      const range = document.createRange();
-      range.selectNodeContents($('#bibtex'));
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-      copyStatus.textContent = 'Citation selected. Press Ctrl/Cmd + C to copy.';
-    }
-    window.setTimeout(() => { copyButton.textContent = 'Copy citation'; copyStatus.textContent = ''; }, 2600);
-  });
-
 })();
