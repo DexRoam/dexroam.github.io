@@ -3,13 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#ffffff" data-theme-color>
   <meta name="description" content="DexRoam learns mobile bimanual dexterous manipulation from tracker-free egocentric whole-body human demonstrations.">
   <meta property="og:title" content="DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations">
   <meta property="og:description" content="Continuous, coupled human-to-robot transfer for whole-body mobile manipulation.">
   <meta property="og:image" content="assets/images/dexroam-overview.png">
   <meta property="og:type" content="website">
   <title>DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations</title>
+  <script>
+    (() => {
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('dexroam-theme'); } catch {}
+      const theme = savedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
   <link rel="stylesheet" href="assets/css/styles.css">
   <script defer src="assets/js/main.js"></script>
 </head>
@@ -34,6 +42,9 @@
           <a href="#method">Method</a>
           <a href="#results">Results</a>
         </div>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+          <span data-theme-label>Dark</span>
+        </button>
         <a class="nav-paper" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer">Read paper</a>
       </div>
     </nav>
@@ -108,7 +119,7 @@
         <div class="capture-media-grid">
           <figure class="capture-schematic capture-media-card reveal">
             <div class="capture-schematic-image">
-              <img src="assets/images/human_data_collection.png" alt="Tracker-free human data capture with a Meta Quest 3, ZED Mini camera, real-time egocentric RGB streaming, head pose, hand keypoints, and full-body joint tracking" loading="lazy" width="951" height="1445">
+              <img src="assets/images/human_data_collection_light.png" data-theme-image data-light-src="assets/images/human_data_collection_light.png" data-dark-src="assets/images/human_data_collection_dark.png" alt="Tracker-free human data capture with a Meta Quest 3, ZED Mini camera, real-time egocentric RGB streaming, head pose, hand keypoints, and full-body joint tracking" loading="lazy" width="951" height="1445">
             </div>
           </figure>
 
@@ -140,7 +151,7 @@
         <div class="capture-media-grid teleop-media-grid">
           <figure class="capture-schematic capture-media-card reveal">
             <div class="capture-schematic-image">
-              <img src="assets/images/robot_teleop.png" alt="Whole-body mobile dexterous teleoperation setup connecting the operator’s VR headset, controller, and glove to a mobile bimanual robot" loading="lazy" width="1803" height="1543">
+              <img src="assets/images/robot_teleop_light.png" data-theme-image data-light-src="assets/images/robot_teleop_light.png" data-dark-src="assets/images/robot_teleop_dark.png" alt="Whole-body mobile dexterous teleoperation setup connecting the operator’s VR headset, controller, and glove to a mobile bimanual robot" loading="lazy" width="1803" height="1543">
             </div>
           </figure>
 
@@ -163,7 +174,7 @@
         </div>
 
         <figure class="alignment-figure reveal">
-          <img src="assets/images/human_to_robot_alignment.png" alt="Human-to-robot alignment pipeline: root-centric human motion is mapped to robot-space trajectories and temporally resampled into a robot-executable whole-body action sequence" loading="lazy" width="3583" height="1679">
+          <img src="assets/images/human_to_robot_alignment_light.png" data-theme-image data-light-src="assets/images/human_to_robot_alignment_light.png" data-dark-src="assets/images/human_to_robot_alignment_dark.png" alt="Human-to-robot alignment pipeline: root-centric human motion is mapped to robot-space trajectories and temporally resampled into a robot-executable whole-body action sequence" loading="lazy" width="3583" height="1679">
         </figure>
 
         <div class="alignment-card-grid">
@@ -209,11 +220,11 @@
           <div class="distribution-comparison" data-distribution-comparison aria-live="polite">
             <figure class="distribution-panel">
               <figcaption>Before Alignment</figcaption>
-              <img data-distribution-before src="assets/images/action_distribution/pick_shutiao_abs.png" alt="Pick Chips Can human and robot action distributions before alignment" width="5464" height="5464" loading="lazy" decoding="async">
+              <img data-distribution-before data-theme-image src="assets/images/action_distribution_light/pick_shutiao_abs.png" data-light-src="assets/images/action_distribution_light/pick_shutiao_abs.png" data-dark-src="assets/images/action_distribution_dark/pick_shutiao_abs.png" alt="Pick Chips Can human and robot action distributions before alignment" width="5464" height="5464" loading="lazy" decoding="async">
             </figure>
             <figure class="distribution-panel">
               <figcaption>After Full Alignment</figcaption>
-              <img data-distribution-after src="assets/images/action_distribution/pick_shutaio_retarget.png" alt="Pick Chips Can human and robot action distributions after full alignment" width="5464" height="5464" loading="lazy" decoding="async">
+              <img data-distribution-after data-theme-image src="assets/images/action_distribution_light/pick_shutaio_retarget.png" data-light-src="assets/images/action_distribution_light/pick_shutaio_retarget.png" data-dark-src="assets/images/action_distribution_dark/pick_shutaio_retarget.png" alt="Pick Chips Can human and robot action distributions after full alignment" width="5464" height="5464" loading="lazy" decoding="async">
             </figure>
 
             <aside class="distribution-metrics" aria-label="Distribution distance metrics for the selected task">

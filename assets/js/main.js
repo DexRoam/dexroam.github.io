@@ -3,6 +3,40 @@
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  const themeToggle = $('[data-theme-toggle]');
+  const themeLabel = $('[data-theme-label]');
+  const themeColor = $('[data-theme-color]');
+  const themeImages = $$('[data-theme-image]');
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+  const syncThemeImage = (image, theme) => {
+    const nextSource = theme === 'dark' ? image.dataset.darkSrc : image.dataset.lightSrc;
+    if (nextSource && image.getAttribute('src') !== nextSource) image.setAttribute('src', nextSource);
+  };
+  const applyTheme = (theme, persist = false) => {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = nextTheme;
+    themeImages.forEach((image) => syncThemeImage(image, nextTheme));
+    if (themeToggle) {
+      const dark = nextTheme === 'dark';
+      themeToggle.setAttribute('aria-pressed', String(dark));
+      themeToggle.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} mode`);
+      if (themeLabel) themeLabel.textContent = dark ? 'Light' : 'Dark';
+    }
+    if (themeColor) themeColor.setAttribute('content', nextTheme === 'dark' ? '#080d17' : '#ffffff');
+    if (persist) {
+      try { localStorage.setItem('dexroam-theme', nextTheme); } catch {}
+    }
+  };
+  applyTheme(document.documentElement.dataset.theme || (systemTheme.matches ? 'dark' : 'light'));
+  themeToggle?.addEventListener('click', () => {
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
+  });
+  systemTheme.addEventListener?.('change', (event) => {
+    let savedTheme = null;
+    try { savedTheme = localStorage.getItem('dexroam-theme'); } catch {}
+    if (!savedTheme) applyTheme(event.matches ? 'dark' : 'light');
+  });
+
   const header = $('[data-header]');
   const progress = $('.scroll-progress span');
 
@@ -158,26 +192,26 @@
   const distributionTasks = {
     pick: {
       label: 'Pick Chips Can',
-      before: 'assets/images/action_distribution/pick_shutiao_abs.png',
-      after: 'assets/images/action_distribution/pick_shutaio_retarget.png',
+      before: { light: 'assets/images/action_distribution_light/pick_shutiao_abs.png', dark: 'assets/images/action_distribution_dark/pick_shutiao_abs.png' },
+      after: { light: 'assets/images/action_distribution_light/pick_shutaio_retarget.png', dark: 'assets/images/action_distribution_dark/pick_shutaio_retarget.png' },
       metrics: { mmd: [0.598, 0.313], swd: [0.926, 0.563] }
     },
     pour: {
       label: 'Pour Water',
-      before: 'assets/images/action_distribution/pour_water_abs.png',
-      after: 'assets/images/action_distribution/pour_water_retarget.png',
+      before: { light: 'assets/images/action_distribution_light/pour_water_abs.png', dark: 'assets/images/action_distribution_dark/pour_water_abs.png' },
+      after: { light: 'assets/images/action_distribution_light/pour_water_retarget.png', dark: 'assets/images/action_distribution_dark/pour_water_retarget.png' },
       metrics: { mmd: [0.631, 0.384], swd: [1.277, 0.860] }
     },
     stool: {
       label: 'Push Chair & Close Laptop',
-      before: 'assets/images/action_distribution/push_stool_abs.png',
-      after: 'assets/images/action_distribution/push_stool_retarget.png',
+      before: { light: 'assets/images/action_distribution_light/push_stool_abs.png', dark: 'assets/images/action_distribution_dark/push_stool_abs.png' },
+      after: { light: 'assets/images/action_distribution_light/push_stool_retarget.png', dark: 'assets/images/action_distribution_dark/push_stool_retarget.png' },
       metrics: { mmd: [0.553, 0.274], swd: [0.940, 0.719] }
     },
     bin: {
       label: 'Throw Trash',
-      before: 'assets/images/action_distribution/put_bottle_bin_abs.png',
-      after: 'assets/images/action_distribution/put_bottle_bin_retarget.png',
+      before: { light: 'assets/images/action_distribution_light/put_bottle_bin_abs.png', dark: 'assets/images/action_distribution_dark/put_bottle_bin_abs.png' },
+      after: { light: 'assets/images/action_distribution_light/put_bottle_bin_retarget.png', dark: 'assets/images/action_distribution_dark/put_bottle_bin_retarget.png' },
       metrics: { mmd: [0.628, 0.359], swd: [1.004, 0.729] }
     }
   };
@@ -221,9 +255,13 @@
         button.tabIndex = active ? 0 : -1;
         if (active && focusButton) button.focus();
       });
-      distributionBefore.src = task.before;
+      distributionBefore.dataset.lightSrc = task.before.light;
+      distributionBefore.dataset.darkSrc = task.before.dark;
+      syncThemeImage(distributionBefore, document.documentElement.dataset.theme);
       distributionBefore.alt = `${task.label} human and robot action distributions before alignment`;
-      distributionAfter.src = task.after;
+      distributionAfter.dataset.lightSrc = task.after.light;
+      distributionAfter.dataset.darkSrc = task.after.dark;
+      syncThemeImage(distributionAfter, document.documentElement.dataset.theme);
       distributionAfter.alt = `${task.label} human and robot action distributions after full alignment`;
       renderDistributionMetrics(task);
       Promise.allSettled([distributionBefore.decode(), distributionAfter.decode()]).then(() => {
@@ -392,7 +430,7 @@
       role: 'img',
       'aria-label': 'Robot-data efficiency success-rate curves for GR00T N1.7 and π0.5 across three real-world tasks'
     });
-    const background = createSvgNode('rect', { x: 0, y: 0, width: chartWidth, height: chartHeight, rx: 18, fill: '#ffffff' });
+    const background = createSvgNode('rect', { x: 0, y: 0, width: chartWidth, height: chartHeight, rx: 18, fill: 'var(--chart-bg)' });
     svg.append(background);
     const getPoint = (budget, success, panelX, panelY) => ({
       x: panelX + budget / 50 * panelWidth,
@@ -404,12 +442,12 @@
       title.textContent = label;
       markerGroup.append(title);
       if (marker === 'circle') {
-        markerGroup.append(createSvgNode('circle', { cx: point.x, cy: point.y, r: 7, fill: color, stroke: '#fff', 'stroke-width': 2 }));
+        markerGroup.append(createSvgNode('circle', { cx: point.x, cy: point.y, r: 7, fill: color, stroke: 'var(--chart-marker-outline)', 'stroke-width': 2 }));
       } else if (marker === 'diamond') {
-        markerGroup.append(createSvgNode('polygon', { points: `${point.x},${point.y - 8} ${point.x + 8},${point.y} ${point.x},${point.y + 8} ${point.x - 8},${point.y}`, fill: color, stroke: '#fff', 'stroke-width': 2 }));
+        markerGroup.append(createSvgNode('polygon', { points: `${point.x},${point.y - 8} ${point.x + 8},${point.y} ${point.x},${point.y + 8} ${point.x - 8},${point.y}`, fill: color, stroke: 'var(--chart-marker-outline)', 'stroke-width': 2 }));
       } else {
-        markerGroup.append(createSvgNode('line', { x1: point.x - 7, y1: point.y - 7, x2: point.x + 7, y2: point.y + 7, stroke: '#fff', 'stroke-width': 6, 'stroke-linecap': 'round' }));
-        markerGroup.append(createSvgNode('line', { x1: point.x - 7, y1: point.y + 7, x2: point.x + 7, y2: point.y - 7, stroke: '#fff', 'stroke-width': 6, 'stroke-linecap': 'round' }));
+        markerGroup.append(createSvgNode('line', { x1: point.x - 7, y1: point.y - 7, x2: point.x + 7, y2: point.y + 7, stroke: 'var(--chart-marker-outline)', 'stroke-width': 6, 'stroke-linecap': 'round' }));
+        markerGroup.append(createSvgNode('line', { x1: point.x - 7, y1: point.y + 7, x2: point.x + 7, y2: point.y - 7, stroke: 'var(--chart-marker-outline)', 'stroke-width': 6, 'stroke-linecap': 'round' }));
         markerGroup.append(createSvgNode('line', { x1: point.x - 7, y1: point.y - 7, x2: point.x + 7, y2: point.y + 7, stroke: color, 'stroke-width': 3.5, 'stroke-linecap': 'round' }));
         markerGroup.append(createSvgNode('line', { x1: point.x - 7, y1: point.y + 7, x2: point.x + 7, y2: point.y - 7, stroke: color, 'stroke-width': 3.5, 'stroke-linecap': 'round' }));
       }
@@ -420,7 +458,7 @@
       appendSvgText(svg, `${row.label} Success Rate`, {
         x: 23,
         y: panelY + panelHeight / 2,
-        fill: '#243852',
+        fill: 'var(--chart-text)',
         'font-size': 15,
         'font-weight': 650,
         'text-anchor': 'middle',
@@ -428,18 +466,18 @@
       });
       row.tasks.forEach((task, taskIndex) => {
         const panelX = marginLeft + taskIndex * (panelWidth + panelGapX);
-        svg.append(createSvgNode('rect', { x: panelX, y: panelY, width: panelWidth, height: panelHeight, rx: 12, fill: '#fbfcff', stroke: '#d8e2f5', 'stroke-width': 1 }));
-        appendSvgText(svg, task.title, { x: panelX + panelWidth / 2, y: panelY - 13, fill: '#162338', 'font-size': 13, 'font-weight': 650, 'text-anchor': 'middle' });
+        svg.append(createSvgNode('rect', { x: panelX, y: panelY, width: panelWidth, height: panelHeight, rx: 12, fill: 'var(--chart-panel)', stroke: 'var(--chart-border)', 'stroke-width': 1 }));
+        appendSvgText(svg, task.title, { x: panelX + panelWidth / 2, y: panelY - 13, fill: 'var(--chart-text)', 'font-size': 13, 'font-weight': 650, 'text-anchor': 'middle' });
         yTicks.forEach((tick) => {
           const y = panelY + panelHeight - tick / 100 * panelHeight;
-          svg.append(createSvgNode('line', { x1: panelX, y1: y, x2: panelX + panelWidth, y2: y, stroke: '#dfe7f4', 'stroke-width': 1, 'stroke-dasharray': '4 4' }));
-          if (taskIndex === 0) appendSvgText(svg, String(tick), { x: panelX - 9, y: y + 4, fill: '#718097', 'font-size': 10, 'text-anchor': 'end' });
+          svg.append(createSvgNode('line', { x1: panelX, y1: y, x2: panelX + panelWidth, y2: y, stroke: 'var(--chart-grid)', 'stroke-width': 1, 'stroke-dasharray': '4 4' }));
+          if (taskIndex === 0) appendSvgText(svg, String(tick), { x: panelX - 9, y: y + 4, fill: 'var(--chart-muted)', 'font-size': 10, 'text-anchor': 'end' });
         });
         robotBudgets.forEach((budget) => {
           const x = panelX + budget / 50 * panelWidth;
-          appendSvgText(svg, String(budget), { x, y: panelY + panelHeight + 18, fill: '#526179', 'font-size': 10, 'text-anchor': 'middle' });
+          appendSvgText(svg, String(budget), { x, y: panelY + panelHeight + 18, fill: 'var(--chart-muted)', 'font-size': 10, 'text-anchor': 'middle' });
         });
-        appendSvgText(svg, 'Robot Demos', { x: panelX + panelWidth / 2, y: panelY + panelHeight + 36, fill: '#526179', 'font-size': 10, 'font-weight': 600, 'text-anchor': 'middle' });
+        appendSvgText(svg, 'Robot Demos', { x: panelX + panelWidth / 2, y: panelY + panelHeight + 36, fill: 'var(--chart-muted)', 'font-size': 10, 'font-weight': 600, 'text-anchor': 'middle' });
         Object.entries(dataEfficiencySeries).forEach(([seriesKey, seriesStyle]) => {
           const values = task[seriesKey];
           const points = values.map((value, valueIndex) => value === null ? null : getPoint(robotBudgets[valueIndex], value, panelX, panelY));

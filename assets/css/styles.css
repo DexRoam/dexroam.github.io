@@ -12,6 +12,13 @@
   --orange-hot: #2555bd;
   --purple: #224b9a;
   --purple-deep: #102451;
+  --chart-bg: #ffffff;
+  --chart-panel: #fbfcff;
+  --chart-border: #d8e2f5;
+  --chart-grid: #dfe7f4;
+  --chart-text: #243852;
+  --chart-muted: #718097;
+  --chart-marker-outline: #ffffff;
   --shell: min(1280px, calc(100vw - 64px));
   --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --sans: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -962,6 +969,23 @@ body { background: var(--white); }
 }
 .nav-paper:hover { color: var(--white); border-color: #244fa7; background: #244fa7; }
 
+.theme-toggle {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-light);
+  border-radius: 999px;
+  color: #526179;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--orange-hot); border-color: rgba(37, 85, 189, .42); background: rgba(37, 85, 189, .06); }
+
 .hero {
   height: 100svh;
   min-height: 700px;
@@ -1301,6 +1325,7 @@ body { background: var(--white); }
     background: rgba(255, 255, 255, .97);
   }
   .nav-links a { color: var(--black); }
+  .theme-toggle { width: 100%; }
   .hero { min-height: 720px; }
   .hero-copy { padding: 116px 10px 56px; }
   .hero h1 { max-width: 650px; }
@@ -2001,3 +2026,159 @@ body { color: #162338; }
 /* Section titles stand on their own; remove the former eyebrow labels. */
 .eyebrow,
 .highlight-kicker { display: none; }
+
+/* Dark theme: deep blue-black surfaces with the same restrained blue accent. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --black: #f2f6ff;
+  --black-soft: #0c1321;
+  --black-raised: #111b2d;
+  --paper: #080d17;
+  --white: #080d17;
+  --gray: #9caabe;
+  --gray-dark: #9caabe;
+  --line-dark: rgba(128, 161, 226, .2);
+  --line-light: rgba(128, 161, 226, .2);
+  --orange: #6f9eff;
+  --orange-hot: #6f9eff;
+  --purple: #6f9eff;
+  --purple-deep: #0b1426;
+  --chart-bg: #0b1220;
+  --chart-panel: #101a2b;
+  --chart-border: #263957;
+  --chart-grid: #263957;
+  --chart-text: #e7eefb;
+  --chart-muted: #96a7bf;
+  --chart-marker-outline: #0b1220;
+  background: #080d17;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .hero,
+html[data-theme="dark"] .demo-video-section,
+html[data-theme="dark"] .capture-section,
+html[data-theme="dark"] .method-section,
+html[data-theme="dark"] .tasks-section,
+html[data-theme="dark"] .results-section,
+html[data-theme="dark"] .data-efficiency-section {
+  color: #e7eefb;
+  background: #080d17;
+}
+
+html[data-theme="dark"] .nav,
+html[data-theme="dark"] .site-header.is-scrolled .nav {
+  color: #eef4ff;
+  border-bottom-color: rgba(128, 161, 226, .18);
+  background: rgba(8, 13, 23, .9);
+}
+html[data-theme="dark"] .site-header.is-scrolled { background: rgba(8, 13, 23, .94); }
+html[data-theme="dark"] .brand-word,
+html[data-theme="dark"] .nav-links a:hover,
+html[data-theme="dark"] .nav-links a.is-active { color: #eef4ff; }
+html[data-theme="dark"] .nav-links a { color: #9ba9bc; }
+html[data-theme="dark"] .nav-links a::after { background: #eef4ff; }
+html[data-theme="dark"] .nav-paper { color: #080d17; border-color: #eef4ff; background: #eef4ff; }
+html[data-theme="dark"] .theme-toggle { color: #a9b7ca; border-color: rgba(128, 161, 226, .28); }
+html[data-theme="dark"] .theme-toggle:hover { color: #dce8ff; border-color: #6f9eff; background: rgba(111, 158, 255, .1); }
+
+html[data-theme="dark"] .hero-orb {
+  background: radial-gradient(
+    ellipse at 50% 108%,
+    #07132f 0%,
+    #123b8d 27%,
+    #3569cf 44%,
+    rgba(88, 130, 220, .64) 57%,
+    rgba(54, 75, 116, .3) 68%,
+    rgba(8, 13, 23, 0) 81%
+  );
+}
+html[data-theme="dark"] .hero h1,
+html[data-theme="dark"] .hero-author-list { color: #f2f6ff; }
+html[data-theme="dark"] .hero-affiliations { color: #aeb9c9; }
+html[data-theme="dark"] .hero-author-note { color: #8391a6; }
+html[data-theme="dark"] .button-dark { color: #080d17; border-color: #eef4ff; background: #eef4ff; }
+html[data-theme="dark"] .button-dark:hover { color: #fff; border-color: #3568d4; background: #3568d4; }
+html[data-theme="dark"] .button-quiet { color: #e7eefb; border-color: rgba(158, 180, 220, .34); background: rgba(12, 19, 33, .72); }
+
+html[data-theme="dark"] .highlight-statement,
+html[data-theme="dark"] .policy-results-panel,
+html[data-theme="dark"] .data-efficiency-panel {
+  border-color: rgba(128, 161, 226, .2);
+  background: #0c1423;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, .24);
+}
+html[data-theme="dark"] .highlight-statement p { color: #aab6c8; }
+html[data-theme="dark"] .highlight-statement strong,
+html[data-theme="dark"] .highlight-underline { color: #80a8ff; }
+html[data-theme="dark"] .demo-video-caption { color: #8f9db1; }
+
+html[data-theme="dark"] :where(
+  .capture-system-heading h2,
+  .policy-results-heading h2,
+  .data-efficiency-heading h2,
+  .deployment-current-title,
+  .alignment-card h3,
+  .alignment-output strong,
+  .distribution-heading h3,
+  .distribution-metric-title h4,
+  .policy-chart-heading h3
+) { color: #e7eefb; }
+
+html[data-theme="dark"] .alignment-card,
+html[data-theme="dark"] .alignment-card:nth-child(2) {
+  border-color: rgba(128, 161, 226, .2);
+  background: linear-gradient(145deg, #101a2b, #0b1321);
+}
+html[data-theme="dark"] .alignment-card-copy,
+html[data-theme="dark"] .alignment-output > p:last-child,
+html[data-theme="dark"] .distribution-heading > p:last-child { color: #9caabe; }
+html[data-theme="dark"] .alignment-watermark { color: rgba(111, 158, 255, .06); }
+
+html[data-theme="dark"] .distribution-tabs button {
+  color: #9cacc2;
+  border-color: rgba(128, 161, 226, .2);
+  background: #0d1626;
+}
+html[data-theme="dark"] .distribution-tabs button:hover { color: #8db0ff; border-color: rgba(111, 158, 255, .5); }
+html[data-theme="dark"] .distribution-tabs button.is-active { color: #fff; border-color: #3568d4; background: #3568d4; }
+html[data-theme="dark"] .distribution-panel figcaption,
+html[data-theme="dark"] .distribution-metrics-legend,
+html[data-theme="dark"] .distribution-metric-title span,
+html[data-theme="dark"] .distribution-metric-series { color: #94a5bd; }
+html[data-theme="dark"] .distribution-metric-value { color: #dce6f6; }
+html[data-theme="dark"] .distribution-metric-bars { border-bottom-color: #60718d; background: repeating-linear-gradient(to bottom, rgba(128, 161, 226, .13) 0 1px, transparent 1px 33.333%); }
+
+html[data-theme="dark"] .policy-results-controls select {
+  color: #e2ebf8;
+  border-color: rgba(128, 161, 226, .24);
+  background-color: #111c2d;
+}
+html[data-theme="dark"] .policy-results-legend span,
+html[data-theme="dark"] .policy-chart-task,
+html[data-theme="dark"] .policy-chart-y-label,
+html[data-theme="dark"] .policy-chart-bar span { color: #b4c0d1; }
+html[data-theme="dark"] .policy-chart-scale { color: #91a1b8; }
+html[data-theme="dark"] .policy-chart-plot { border-color: #60718d; }
+html[data-theme="dark"] .policy-chart-grid i { border-top-color: rgba(128, 161, 226, .16); }
+
+html[data-theme="dark"] .data-efficiency-legend button { color: #aab7c9; }
+html[data-theme="dark"] .data-efficiency-legend button:hover,
+html[data-theme="dark"] .data-efficiency-legend button:focus-visible,
+html[data-theme="dark"] .data-efficiency-legend button[aria-pressed="true"] {
+  color: #e7eefb;
+  border-color: rgba(128, 161, 226, .24);
+  background: #111c2d;
+}
+html[data-theme="dark"] .data-efficiency-legend i::after { border-color: #0c1423; }
+html[data-theme="dark"] .data-efficiency-note strong { color: #80a8ff; }
+
+html[data-theme="dark"] .side-toc { color: #e7eefb; }
+html[data-theme="dark"] .side-toc-title { border-bottom-color: rgba(128, 161, 226, .24); }
+html[data-theme="dark"] .side-toc a { color: #8292a9; }
+html[data-theme="dark"] .side-toc a:hover,
+html[data-theme="dark"] .side-toc a.is-active { color: #80a8ff; }
+
+@media (max-width: 760px) {
+  html[data-theme="dark"] .nav-menu { color: #e7eefb; border-color: rgba(128, 161, 226, .22); background: rgba(8, 13, 23, .98); }
+  html[data-theme="dark"] .nav-links a { color: #e7eefb; }
+}
