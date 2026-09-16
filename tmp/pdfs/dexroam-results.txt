@@ -1,0 +1,383 @@
+                                                                                                                                                                                                        7
+
+
+Raw Data Distribution
+Aligned Data Distribution
+
+
+
+
+            Pick Chips Can                             Pour Water                            Throw Trash              Push Chair & Close Laptop
+   Fig. 5. Human–robot action distribution before and after alignment. PCA visualization of whole-body actions on representative tasks. Top: retargeted
+   absolute human actions and robot actions before action-semantic and temporal alignment, which occupy clearly separated regions. Bottom: fully aligned
+   robot-centric relative actions, where the two distributions largely overlap, with marginals shown along each axis.
+
+                                                 Maximum Mean Discrepancy (MMD)                                      TABLE I: Real-robot replay of transferred human trajectories. Position
+                                                                 Raw       Aligned                                   and rotation errors of retargeted human motions across different body com-
+Distribution Gap
+
+
+
+
+                    0.8
+                                0.598            0.631           0.628                                               ponents, measured in millimeters (mm) and degrees (°).
+                                                                                     0.585           0.553
+                    0.6
+
+                                                         0.384                               0.413
+                    0.4                                                  0.359                                       Component Metric       Pick Chips Can Pour Water Throw Trash Average
+                                        0.313
+                                                                                                             0.274
+                    0.2
+                                                                                                                                 Position        13.49           11.82           12.31          12.54
+                                                                                                                     Torso
+                    0.0                                                                                                          Rotation        2.32             1.64            1.57           1.84
+                                Pick Chips Can   Pour Water      Throw Trash         Deliver Fruit   Push Chair &
+                                                                                                     Close Laptop
+                                                                                                                                 Position        3.75            4.27            4.02           4.01
+                                                 Sliced Wasserstein Distance (SWD)                                   Left Arm
+                                                                                                                                 Rotation        0.51            0.58            0.57           0.55
+                                                 1.277
+                                                                 Raw       Aligned
+Distribution Gap
+
+
+
+
+                     1.2
+                                                                 1.004               1.008
+                                                                                                     0.940
+                                                                                                                                 Position        5.30            5.93            7.67           6.30
+                                0.926
+                                                         0.860
+                                                                                                                     Right Arm
+                                                                         0.729                               0.719
+                                                                                                                                 Rotation        0.70            0.84            1.22           0.92
+                    0.8                                                                      0.684
+                                        0.563
+                                                                                                                     Head        Rotation        1.22            1.36            1.53           1.37
+                    0.4
+
+                                                                                                                     Completed                    5/5             5/5             5/5           15/15
+                    0.0
+                                Pick Chips Can   Pour Water      Throw Trash         Deliver Fruit   Push Chair &
+                                                                                                     Close Laptop    TABLE II: Tracker-free vs. tracker-based capture. Retargeting accuracy
+                                                                                                                     averaged over 15 trajectories across three tasks. Position and rotation errors
+   Fig. 6. Quantitative human–robot action distribution alignment. MMD                                               are reported in millimeters and degrees, respectively.
+   and SWD between human-derived and robot whole-body actions on all five
+   tasks, lower values indicate closer distributions. Alignment reduces both                                              Human Motion              Torso        Left Arm        Right Arm       Head
+   metrics on every task, by 41.7% in MMD and 31.1% in SWD on average.                                                      Capture              Pos. Rot.      Pos. Rot.       Pos. Rot.        Rot.
+
+   for downstream policy evaluation. Based on these evaluation                                                         Tracker-free (Ours)  12.54        1.84   4.01     0.55   6.30     0.92    1.37
+   metrics, we investigate when, how, and why aligned human                                                          PICO + Motion Trackers 13.16        2.06   4.12     0.57   5.63     0.81    1.23
+   demonstrations benefit mobile bimanual dexterous manipula-
+   tion. Specifically, we study four questions:                                                                      B. Q1: Transfer Quality
+
+                            • Q1: Transfer Quality. How effectively does human-to-                                      1) Action distribution alignment.: We examine whether
+                              robot transfer convert human motion into executable and                                the transferred human supervision is compatible with the
+                              distribution-aligned robot training data?                                              action distribution of the real robot. Across all five tasks,
+                            • Q2: Policy Learning. Does aligned human supervision
+                                                                                                                     alignment consistently reduces both distribution metrics, de-
+                              improve policy learning, and which training paradigm                                   creasing MMD by 41.7% and SWD by 31.1% on average
+                              leverages it most effectively?                                                         (Fig. 6). The PCA visualization in Fig. 5 shows the same
+                            • Q3: Data Efficiency. How does aligned human data im-
+                                                                                                                     qualitative trend, with substantially greater overlap between
+                              prove robot learning with limited robot demonstrations?                                human-derived and robot actions after alignment. Together
+                            • Q4: Alignment Analysis. How do different alignment
+                                                                                                                     with the replay results, these findings show that DexRoam
+                              choices affect fine-grained human-to-robot transfer?                                   produces human supervision that is not only executable on
+                                                                                                                     the target embodiment, but also better matched to real robot
+                                                                                                                                                                                                                                                                                                                                                                                                         8
+
+
+
+                                                                             GR00T N1.7 Task Success Rate                                                                                                                                                                     GR00T N1.7 Task Completion Score
+                    1.0                                                                                                                                                                                                    1.0                        0.96
+                                                                                                                                                                                                                                                                                                              0.92
+                                               0.90
+                                                                                                                                                                                                                                        0.86                                      0.86
+                                                                                                                                                                                                                                                                                                  0.83 0.83
+                                                                                                                                                                                                                                                                    0.80 0.80              0.80
+                    0.8                                                                                 0.75                                                                                                               0.8                 0.74
+                                                                                                                                                                                                                                                                                                                                                                                                  0.77
+
+
+
+
+                                                                                                                                                                                                   Task Completion Score
+                                 0.70                                                                                                                                                                                                                                                                                                     0.71                                      0.70
+Task Success Rate
+
+
+
+
+                                                                                                                                                                                                                                                             0.67                                                                                                                          0.67
+                                        0.65                               0.65                                                                                                                                                                                                                                             0.64 0.64
+                                                                                                                                                                                                                                 0.63
+                                                             0.60                                0.60
+                    0.6                                             0.55                  0.55                                                                                              0.56                           0.6                                                                                                                                               0.56
+                          0.50                                                                                                                                                                                                                                                                                       0.49
+                                                                                                                                                                              0.46
+                                                                                                                                                                                     0.42                                                                                                                                                                             0.42
+                                                                                   0.40                                                                                                                                                                                                                                                                 0.40
+                    0.4                               0.35                                                                                                                                                                 0.4
+                                                                                                                                                                                                                                                                                                                                                               0.33
+                                                                                                                                                                       0.29
+                                                                                                                                    0.25          0.25          0.25
+                                                                                                                      0.20                                                                                                                                                                                                                       0.19
+                    0.2                                                                                                      0.15                        0.15                                                              0.2
+                                                                                                               0.10                        0.10
+
+
+                    0.0                                                                                                                                                                                                    0.0
+                            Pick Chips                       Throw                        Deliver               Push Chair &                      Pour                    Average                                                  Pick Chips                       Throw                         Deliver             Push Chair &                      Pour                    Average
+                               Can                           Trash                         Fruit                Close Laptop                      Water                                                                               Can                           Trash                          Fruit              Close Laptop                      Water
+
+                                                                                   PI0.5 Task Success Rate                                                                                                                                                                               PI0.5 Task Completion Score
+                    1.0                                                                                                                                                                                                    1.0
+                                                                                                                                                                                                                                                                                                         0.90 0.89
+                                                                                                                                                                                                                                               0.85 0.84                                          0.86
+                                                                                                                                                                                                                                                                                  0.84
+                                                                                                                                                                                                                                                                    0.81
+                                                                                                                                                                                                                                                                           0.79
+                    0.8                 0.75 0.75                                                       0.75                                                                                                               0.8                                                             0.74
+
+
+
+
+                                                                                                                                                                                                   Task Completion Score
+                                                                                                                                                                                                                                                                                                                                                                                                  0.73
+                                                                                          0.70 0.70                                                                                                                                                                                                                                                                                        0.69
+Task Success Rate
+
+
+
+
+                                                                                                                                                                                                                                        0.66                                                                                                                                        0.67
+                                                             0.65          0.65
+                                                                                                                                                                                                                                                                                                                            0.61          0.62
+                                                                                   0.60                                                                                                                                          0.60                        0.59                                                                  0.59
+                    0.6                                             0.55
+                                                                                                                                                                                            0.57                           0.6
+                                                                                                                                                                                                                                                                                                                                                                             0.52
+                                 0.50                                                                                                                                         0.49 0.49                                                                                                                              0.48
+                                                                                                                                                                                                                                                                                                                                                                      0.44
+                                                                                                                                                                                                                                                                                                                                                        0.42
+                          0.40                                                                                                      0.40
+                    0.4                               0.35                                                                   0.35                                                                                          0.4                                                                                                                                 0.34
+                                                                                                                                                                       0.32
+                                                                                                                      0.30                        0.30          0.30
+
+                                                                                                               0.20                                                                                                                                                                                                                              0.19
+                    0.2                                                                                                                                                                                                    0.2
+                                                                                                                                                         0.10
+                                                                                                                                           0.05
+
+                    0.0                                                                                                                                                                                                    0.0
+                            Pick Chips                       Throw                        Deliver               Push Chair &                      Pour                    Average                                                  Pick Chips                       Throw                         Deliver             Push Chair &                      Pour                    Average
+                               Can                           Trash                         Fruit                Close Laptop                      Water                                                                               Can                           Trash                          Fruit              Close Laptop                      Water
+
+                                                                                  Robot Only                             Human-Robot Cotrain                                            Human Pretrain + Robot FT                                                                 Human Pretrain + Cotrain FT
+
+   Fig. 7. Main policy learning results. Main policy learning results. Success rate (SR, left) and task completion score (TCS, right) of Robot-only and
+   three human-assisted training strategies on five real-world tasks, for GR00T N1.7 (top) and π0.5 (bottom). All three human-assisted strategies improve over
+   Robot-only on every task and both backbones, with Human Pretrain + Cotrain FT best or tied-best on every task–backbone combination.
+
+   actions.                                                                                                                                                                                                          policy backbone, or manipulation setting. This remains true
+      2) Real-robot executability.: All 15 transferred human                                                                                                                                                         on Push Chair & Close Laptop, the longest-horizon and most
+   trajectories replay successfully on the real robot with no IK                                                                                                                                                     tightly coupled task, where the best human-assisted setting
+   failures (Tab. I). Across the three tasks, positional replay errors                                                                                                                                               improves success by 15 percentage points on GR00T N1.7
+   remain at approximately the centimeter scale for the torso and                                                                                                                                                    and 20 percentage points on π0.5 . Together, these results
+   millimeter scale for both arms, while rotational errors remain                                                                                                                                                    show that aligned human supervision provides a broadly useful
+   within a few degrees across all evaluated body components.                                                                                                                                                        learning signal for mobile bimanual dexterous manipulation.
+   Despite the different whole-body motion patterns involved, the                                                                                                                                                       The magnitude of the gain, however, depends on how the
+   transferred trajectories can therefore be consistently executed                                                                                                                                                   human supervision is used. Human Pretrain + Cotrain FT
+   by the target robot, supporting their use as robot supervision.                                                                                                                                                   achieves the highest average performance on both backbones
+      3) Tracker-free capture fidelity.: Since tracker-free human                                                                                                                                                    and is best or tied-best on every task–backbone combination.
+   motion capture is a key component of our data collection                                                                                                                                                          This suggests that using human data both to initialize task-
+   system, we further examine whether this lightweight design                                                                                                                                                        relevant behavior and to retain human supervision during
+   compromises the quality of the transferred trajectories. For                                                                                                                                                      subsequent human–robot cotraining makes the most effective
+   comparison, we construct a tracker-based counterpart using a                                                                                                                                                      use of the transferred demonstrations.
+   PICO headset with five Motion Trackers and evaluate it under                                                                                                                                                         Qualitatively, we also observe that human supervision can
+   the same replay protocol. Both systems successfully replay all                                                                                                                                                    introduce useful motion variations absent from the robot
+   trajectories and achieve comparable replay errors across body                                                                                                                                                     demonstrations. On Pick Chips Can, the Robot-only policy
+   components, with no systematic performance gap (Tab. II).                                                                                                                                                         predominantly approaches the can from the front and often
+   This suggests that our tracker-free system substantially reduces                                                                                                                                                  knocks it over when its orientation is perturbed. With human
+   sensing cost and wearable burden while preserving the quality                                                                                                                                                     supervision, the policy can instead adopt a side approach when
+   required for subsequent human-to-robot transfer.                                                                                                                                                                  appropriate, selecting different grasp motions according to
+                                                                                                                                                                                                                     the object orientation. Since this side-grasp pattern is absent
+   C. Q2: Policy Learning                                                                                                                                                                                            from the robot demonstrations but present in the human data,
+                                                                                                                                                                                                                     the behavior provides a concrete example of how human
+     Relative to Robot-only, all three human-assisted training                                                                                                                                                       supervision can expand the motion patterns available to the
+   paradigms improve both SR and TCS across both VLA                                                                                                                                                                 learned policy.
+   backbones and all five tasks (Fig. 7). In terms of average
+   SR, the three paradigms provide gains of +16, +11, and +27
+   percentage points on GR00T N1.7, and +17, +17, and +25                                                                                                                                                            D. Q3: Data Efficiency
+   percentage points on π0.5 . The same positive trend holds
+   across individual tasks, indicating that the benefit of aligned                                                                                                                                                     We fix 50 human demonstrations per task, vary the number
+   human supervision is not tied to a particular training paradigm,                                                                                                                                                  of robot demonstrations over {0, 10, 25, 50}, and evaluate
+                                                                                                                                                                                                   9
+
+
+
+                                        Pick Chips                      Throw Trash                         Basket
+                     100                                                                                                     TABLE III: Ablation of alignment stages. GR00T N1.7 success rate.
+GR00T N1.7 Success Rate
+
+
+
+
+                          80
+                                                                                                                                                                 w/o Temporal   Absolute DexRoam
+                          60                                                                                                 Task        Strategy
+                                                                                                                                                                  Resampling     Action   (Ours)
+                          40
+
+                                                                                                                                         Cotrain                     0.65        0.00      0.70
+                          20                                                                                                 Pick
+                                                                                                                                         Pretrain + FT               0.30        0.00      0.65
+                           0                                                                                                 Chips Can
+                               0   10      25           50    0    10       25           50    0     10      25         50
+                                                                                                                                         Pretrain + Cotrain FT       0.20        0.00      0.90
+                                        Robot Demos                      Robot Demos                      Robot Demos
+                                        Pick Chips                      Throw Trash                         Basket
+                     100                                                                                                                 Cotrain                     0.40        0.00      0.65
+                                                                                                                             Throw
+                          80                                                                                                             Pretrain + FT               0.50        0.00      0.55
+Pi0.5 Success Rate
+
+
+
+
+                                                                                                                             Trash
+                          60
+                                                                                                                                         Pretrain + Cotrain FT       0.60        0.00      0.65
+                          40
+
+
+                          20                                                                                                 fact that absolute poses map human and robot demonstrations
+                           0
+                               0   10      25           50    0    10       25           50    0     10      25         50
+                                                                                                                             into a shared coordinate representation while still retaining
+                                        Robot Demos                      Robot Demos                      Robot Demos
+                                           Robot Data        Human-Robot Cotrain       Human Pretrain Robot FT               a substantial amount of human-specific information. During
+                                                                                                                             training, these factors pull the supervision signal away from
+Fig. 8. Robot-data efficiency with human supervision. Success rate under
+robot demonstration budgets of {0, 10, 25, 50} with 50 human demonstrations                                                  the robot action distribution the policy will face at deployment,
+fixed per task. With aligned human data, success rises sharply once only a                                                   so the policy learns targets entangled with human-specific
+few robot demonstrations are available, and 25 already approach or match the                                                 configurations rather than a stable robot control semantics.
+50-demo Robot-only baseline.
+                                                                                                                                This distribution shift is further amplified over closed-loop
+different human supervision training strategies, with Robot-                                                                 execution. At the start of an episode, the robot’s initial observa-
+only using 50 robot demonstrations as the reference (Fig. 8).                                                                tion o0 = (I0 , P0 ) lies within the distribution of the robot data,
+   1) Human data reduces robot data requirements: With                                                                       so the first predicted chunk a0:H−1 still exhibits a plausible
+only 25 robot demonstrations, human-assisted training on                                                                     execution trend. However, because the training distribution has
+GR00T N1.7 already matches or exceeds the 50-demo Robot-                                                                     been pulled toward that of human-specific absolute actions, the
+only baseline on all three tasks, effectively reducing the                                                                   model biases its predicted targets toward the demonstrator’s
+required robot demonstrations by 50%. On π0.5 , the same                                                                     absolute configurations and incurs a small error. Executing
+25-demo setting remains within 5 percentage points of the 50-                                                                this error drives the next observation oH = (IH , PH ) off
+demo Robot-only baseline. These results show that aligned hu-                                                                the training distribution, which in turn makes the following
+man supervision substantially improves robot-data efficiency,                                                                chunk aH:2H−1 more erroneous. Repeated over an episode,
+enabling comparable policy performance with fewer robot                                                                      this forms a self-amplifying feedback loop that eventually
+demonstrations.                                                                                                              drives the robot into a state from which it cannot recover,
+   2) Few-shot robot data activates human priors: With no                                                                    and the task fails.
+robot demonstrations, neither human-assisted strategy achieves                                                                  Among the three strategies, Human Pretrain + Robot FT
+any task success. However, performance rises sharply once                                                                    exhibits this behavior to a somewhat lesser degree under the
+only 10 robot demonstrations are introduced. This suggests                                                                   absolute-action setting, since finetuning on robot data pulls the
+that aligned human data provides useful task and motion priors                                                               learned distribution partly back toward the robot’s own. The
+that can be activated with only a small amount of robot-specific                                                             finetuning budget, however, is not sufficient to recover it fully,
+supervision. At the same time, the failure of the human-only                                                                 and the resulting policy still completes no trials.
+setting shows that human data amplifies rather than replaces                                                                    2) Temporal alignment improves policy learning: Remov-
+robot data: robot demonstrations remain necessary to ground                                                                  ing task-progress temporal resampling reduces the average
+the policy in the target embodiment and execution domain.                                                                    success rate from 68.3% to 44.2%, a drop of 24.1 percentage
+   The two training paradigms also exhibit different scaling                                                                 points (Tab. III). This degradation is caused by the different
+behavior. Cotrain generally improves more steadily as robot                                                                  execution timescales of human and robot demonstrations:
+data increases, whereas Human Pretrain + Robot FT is less                                                                    without resampling, the same task progress can correspond to
+stable. We hypothesize that finetuning exclusively on a limited                                                              different future action chunks, introducing temporally incon-
+robot dataset can partially overfit to the small robot distribution                                                          sistent supervision. Task-progress temporal resampling aligns
+and weaken the diversity introduced during human pretrain-                                                                   human and robot trajectories at the same execution phase,
+ing, while cotraining continuously retains human supervision                                                                 removing this temporal mismatch.
+throughout optimization.
+
+                                                                                                                             F. Generalization Under Distribution Shift
+E. Q4: Alignment Analysis
+                                                                                                                                We additionally evaluate two distribution shifts on Pick
+   We ablate the two alignment stages that can be removed in                                                                 Chips Can — a changed background scene and an unseen
+isolation, on Pick Chips Can and Throw Trash (Tab. III).                                                                     instruction phrasing. As shown in Fig. 9, we observe consistent
+   1) Absolute actions fail without semantic alignment: Re-                                                                  improvements under both background and instruction shifts.
+placing DexRoam’s robot-centric relative action representa-                                                                  For background shift, Robot-only drops from 50% to 20%,
+tion with absolute retargeted poses causes the policy to fail                                                                while Human Pretrain + Cotrain FT decreases from 90% to
+completely: success is 0% on both tasks and under all three                                                                  55%, maintaining the highest robustness in the novel scene.
+training strategies (Tab. III). We attribute this failure to the                                                             For instruction shift, strategies that retain human data during
+                                                                                                                                                             10
+
+
+
+                                                                                    learns cross-embodiment visual or task representations [25],
+                                                                                    [26], [47], expresses behavior through transferable affor-
+                                                                                    dances, flow, or point trajectories [48]–[51], or translates and
+                                                                                    retargets human data into robot-compatible observations and
+                                                                                    actions [52]–[59]. For mobile whole-body learning, recent
+                                                                                    systems often make transfer tractable through discrete lo-
+                                                                                    comotion commands, phase-aware policies, decoupled base
+                  Original Scene                         Novel Scene
+                                                                                    and manipulation actions, or end-effector and keypoint targets
+                                                                                    executed by downstream controllers [19]–[24], [60]. These
+                                                                                    abstractions improve compatibility but may omit part of the
+                                                                                    original coupled motion. DexRoam instead explicitly aligns
+                                                                                    embodiment, action semantics, and task progress while retain-
+                                                                                    ing a continuous, temporally uninterrupted, jointly predicted
+                                                                                    base–torso–arm–head–hand action space.
+
+
+                                                                                    C. Human Demonstrations for Robot Learning
+Fig. 9. Generalization under distribution shift. Evaluation on Pick Chips
+Can under the original setting, a novel scene, and an unseen instruction               Human demonstrations provide diverse behavioral priors at
+phrasing. The images above show the original and novel scenes. Human-               substantially lower collection cost than robot teleoperation.
+assisted training degrades far less than Robot-only under both shifts, especially
+when human data is retained during finetuning.                                      Large egocentric datasets have progressed from first-person ac-
+                                                                                    tivities and hand–object interactions to paired viewpoints, met-
+finetuning, including Cotrain and Human Pretrain + Cotrain                          ric geometry, full-body motion, and robot-oriented dexterous
+FT, remain largely stable, with only 7% and 6% relative de-                         trajectories [7]–[9], [61]–[66]. Early work mainly extracted
+clines, respectively. These results suggest that aligned human                      reusable representations or rewards, whereas portable inter-
+supervision improves robustness beyond the training distribu-                       faces and transfer pipelines now convert human experience
+tion, particularly when human data continues to participate                         into policy supervision for fixed-base, bimanual, and dexterous
+during policy optimization.                                                         manipulation [10]–[18], [25], [26], [67]–[71]. Human-centric
+                                                                                    VLA and world-model pretraining further scale this idea
+                          V. R ELATED W ORK                                         across data sources and embodiments [72]–[76]. More re-
+                                                                                    cently, EMMA, EgoHumanoid, HoMMI, HuMI, BifrostUMI,
+A. Mobile Manipulation                                                              HALOMI, HERMES, WARP, and OpenHLM extend human
+   Mobile manipulation requires navigation, whole-body                              supervision to mobile or whole-body policies [19]–[24], [44],
+reachability, and object interaction to be coordinated over                         [46], [57]. Preserving mobile, bimanual, and finger-level co-
+spatially extended tasks. Accessible platforms and data sys-                        ordination in one robot-native policy interface nevertheless
+tems have progressed from Stretch and Mobile ALOHA to                               remains comparatively underexplored.
+integrated or modular whole-body pipelines such as Tidy-
+Bot++, BRS, TeleMoMa, MoMa-Teleop, HoMeR, and Su-                                                                R EFERENCES
+perSuit [2], [3], [33]–[38]. Humanoid systems including                              [1] T. Yamamoto, K. Terada, A. Ochiai, F. Saito, Y. Asahara, and K. Murase,
+HumanPlus, HOMIE, TWIST/TWIST2, HumanoidExo, and                                         “Development of human support robot as the research platform of a
+Teleopit further extend teleoperation and policy learning to                             domestic mobile manipulator,” ROBOMECH Journal, vol. 6, 04 2019.
+                                                                                     [2] C. C. Kemp, A. Edsinger, H. M. Clever, and B. Matulevich,
+locomotion, posture, active vision, and dexterous hands [4],                             “The design of stretch: A compact, lightweight mobile manipulator
+[5], [39]–[42]. Beyond collection interfaces, generalist and                             for indoor human environments,” 2022. [Online]. Available: https:
+whole-body VLA or world-action models such as GR00T                                      //arxiv.org/abs/2109.10892
+                                                                                     [3] Z. Fu, T. Z. Zhao, and C. Finn, “Mobile aloha: Learning bimanual
+N1, PanoVLA, Ψ0 , OpenHLM, and ω-0 increasingly address                                  mobile manipulation with low-cost whole-body teleoperation,” 2024.
+language-conditioned bimanual, wheeled, and humanoid loco-                               [Online]. Available: https://arxiv.org/abs/2401.02117
+manipulation [28], [31], [43]–[45]. HERMES also targets                              [4] Q. Ben, F. Jia, J. Zeng, J. Dong, D. Lin, and J. Pang, “Homie:
+                                                                                         Humanoid loco-manipulation with isomorphic exoskeleton cockpit,”
+mobile bimanual dexterity but connects learned manipulation                              2025. [Online]. Available: https://arxiv.org/abs/2502.13013
+skills to a separate navigation module [46]. Despite this                            [5] R. Zhong, Y. Sun, J. Wen, J. Li, C. Cheng, W. Dai, Z. Zeng, H. Lu,
+progress, many systems still require robot-in-the-loop collec-                           Y. Zhu, and Y. Xu, “Humanoidexo: Scalable whole-body humanoid
+                                                                                         manipulation via wearable exoskeleton,” 2025. [Online]. Available:
+tion, specialized interfaces, or substantial embodiment-specific                         https://arxiv.org/abs/2510.03022
+robot data, motivating scalable robot-free demonstrations for                        [6] R. Zhong, C. Cheng, J. Xu, Y. Wei, C. Guo, D. Zhang, W. Dai,
+continuous whole-body learning.                                                          and H. Lu, “Nuexo: A wearable exoskeleton covering all upper limb
+                                                                                         rom for outdoor data collection and teleoperation of humanoid robots,”
+                                                                                         2025. [Online]. Available: https://arxiv.org/abs/2503.10554
+B. Human-Robot Alignment                                                             [7] K. Grauman, A. Westbury, E. Byrne, Z. Chavis, A. Furnari, R. Girdhar,
+                                                                                         J. Hamburger, H. Jiang, M. Liu, X. Liu, M. Martin, T. Nagarajan,
+  Transferring human demonstrations to robots requires re-                               I. Radosavovic, S. K. Ramakrishnan, F. Ryan, J. Sharma, M. Wray,
+                                                                                         M. Xu, E. Z. Xu, C. Zhao, S. Bansal, D. Batra, V. Cartillier, S. Crane,
+solving differences in visual observations, morphology, action                           T. Do, M. Doulaty, A. Erapalli, C. Feichtenhofer, A. Fragomeni, Q. Fu,
+semantics, dynamics, and execution speed. Existing work                                  A. Gebreselasie, C. Gonzalez, J. Hillis, X. Huang, Y. Huang, W. Jia,
+

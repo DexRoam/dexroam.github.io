@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="DexRoam learns mobile bimanual dexterous manipulation from tracker-free egocentric whole-body human demonstrations.">
+  <meta property="og:title" content="DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations">
+  <meta property="og:description" content="Continuous, coupled human-to-robot transfer for whole-body mobile manipulation.">
+  <meta property="og:image" content="assets/images/dexroam-overview.png">
+  <meta property="og:type" content="website">
+  <title>DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script defer src="assets/js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="scroll-progress" aria-hidden="true"><span></span></div>
+
+  <header class="site-header" data-header>
+    <nav class="nav shell" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="DexRoam home">
+        <span class="brand-word">DexRoam</span>
+        <span class="brand-index">01</span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+        <span class="menu-label">Menu</span>
+      </button>
+
+      <div class="nav-menu" id="site-menu">
+        <div class="nav-links">
+          <a href="#overview">Overview</a>
+          <a href="#method">Method</a>
+          <a href="#results">Results</a>
+          <a href="#citation">Citation</a>
+        </div>
+        <a class="nav-paper" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer">Read paper</a>
+      </div>
+    </nav>
+  </header>
+
+  <aside class="side-toc" data-side-toc aria-label="Page contents" aria-hidden="true" inert>
+    <p class="side-toc-title">Content</p>
+    <nav aria-label="On this page">
+      <a href="#highlights">Highlights</a>
+      <a href="#capture">Human Data</a>
+      <a href="#teleoperation">Teleoperation</a>
+      <a href="#method">Alignment</a>
+      <a href="#deployment">Deployment</a>
+      <a href="#results">Policy Results</a>
+      <a href="#data-efficiency">Data Efficiency</a>
+      <a href="#overview">Core Idea</a>
+      <a href="#takeaway">Takeaway</a>
+      <a href="#citation">Citation</a>
+    </nav>
+  </aside>
+
+  <main id="main-content">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-orb" aria-hidden="true"></div>
+      <div class="shell hero-copy">
+        <h1 id="hero-title" class="reveal" aria-label="DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations">
+          <span class="hero-title-name"><span class="hero-title-dex">Dex</span><span class="hero-title-roam">Roam</span></span>
+          <span class="hero-title-subtitle">Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations</span>
+        </h1>
+
+        <div class="hero-authors reveal">
+          <p class="hero-author-list"><strong>Rui Zhou<sup>*</sup></strong>, <strong>Yibo Yuan<sup>*</sup></strong>, <strong>Junkai Zhao<sup>*</sup></strong>, Fangyuan Zhao, Xiaoguang Zhao, Shanghang Zhang<sup>✉</sup>, Sirui Han<sup>✉</sup></p>
+          <p class="hero-affiliations">HKUST · BAAI · Peking University · Beihang University · Chinese Academy of Sciences</p>
+          <p class="hero-author-note"><sup>*</sup> Equal contribution · <sup>✉</sup> Corresponding authors</p>
+        </div>
+
+        <div class="hero-actions reveal">
+          <a class="button button-dark" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer">Read the paper</a>
+          <a class="button button-quiet" href="#method">Explore the method</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-video-section" id="highlights" aria-labelledby="highlights-title">
+      <div class="shell demo-video-shell reveal">
+        <p class="highlight-kicker" id="highlights-title">Research highlights</p>
+
+        <div class="highlight-statement">
+          <p>Mobile bimanual dexterous manipulation requires continuous coordination of locomotion, whole-body motion, and finger-level dexterity, creating a severe robot demonstration bottleneck. <strong>DexRoam</strong> is a complete system for learning such behaviors from egocentric whole-body human demonstrations. To preserve the fine-grained structure of human motion, we perform three explicit alignment stages — <strong>embodiment</strong>, <strong>action-semantic</strong>, and <strong>temporal</strong> — transforming human motion into continuous, coupled robot-compatible action supervision for standard VLA policies. To make collection scalable, DexRoam further provides a <span class="highlight-underline">tracker-free capture system</span> using only a consumer VR headset and a head-mounted stereo camera, without external cameras or motion trackers.</p>
+          <p>Across five real-world tasks and two VLA backbones, aligned human demonstrations raise average success from <strong>29% to 56%</strong> on GR00T N1.7 and from <strong>32% to 57%</strong> on &pi;<sub>0.5</sub>, while matching robot-only training with <span class="highlight-underline">50% fewer robot demonstrations</span>.</p>
+        </div>
+
+        <div class="demo-video-block">
+          <div class="demo-video-frame">
+            <video autoplay muted loop playsinline controls preload="metadata" aria-label="DexRoam system demonstration">
+              <source src="assets/video/DexRoam_Video.mp4" type="video/mp4">
+              Your browser does not support embedded video. <a href="assets/video/DexRoam_Video.mp4">Download the DexRoam video</a>.
+            </video>
+          </div>
+          <div class="demo-video-caption">
+            <span>DexRoam in action</span>
+            <span>System demonstration · 01:23</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section capture-section capture-system-section" id="capture" aria-labelledby="capture-title">
+      <div class="shell capture-system-shell">
+        <div class="capture-system-heading reveal">
+          <p class="eyebrow">Portable capture</p>
+          <h2 id="capture-title">Tracker-Free Egocentric<br><em>Whole-Body Human Data Capture System</em></h2>
+        </div>
+
+        <div class="capture-media-grid">
+          <figure class="capture-schematic capture-media-card reveal">
+            <div class="capture-schematic-image">
+              <img src="assets/images/human_data_collection.png" alt="Tracker-free human data capture with a Meta Quest 3, ZED Mini camera, real-time egocentric RGB streaming, head pose, hand keypoints, and full-body joint tracking" loading="lazy" width="951" height="1445">
+            </div>
+          </figure>
+
+          <figure class="capture-media-card capture-combined-video reveal">
+            <video autoplay muted loop playsinline controls preload="metadata" width="1280" height="1440" aria-label="Combined human data recording and whole-body trajectory visualization">
+              <source src="assets/video/human_data.mp4?v=20260915-215412" type="video/mp4">
+              <a href="assets/video/human_data.mp4">Download the combined human data video</a>.
+            </video>
+          </figure>
+        </div>
+
+        <div class="capture-system-details reveal">
+          <dl class="capture-specs">
+            <div><dt>Tracker-Free</dt><dd>No external cameras, environment markers, or motion trackers.</dd></div>
+            <div><dt>Portable Setup</dt><dd>Only a consumer VR headset and a head-mounted stereo camera.</dd></div>
+            <div><dt>View-Consistent</dt><dd>Live in-headset video streaming aligns the demonstrator’s view with the policy observation.</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="section capture-section capture-system-section teleop-system-section" id="teleoperation" aria-labelledby="teleoperation-title">
+      <div class="shell capture-system-shell">
+        <div class="capture-system-heading reveal">
+          <p class="eyebrow">Robot teleoperation</p>
+          <h2 id="teleoperation-title">Whole-Body Mobile<br><em>Dexterous Teleoperation</em></h2>
+        </div>
+
+        <div class="capture-media-grid teleop-media-grid">
+          <figure class="capture-schematic capture-media-card reveal">
+            <div class="capture-schematic-image">
+              <img src="assets/images/robot_teleop.png" alt="Whole-body mobile dexterous teleoperation setup connecting the operator’s VR headset, controller, and glove to a mobile bimanual robot" loading="lazy" width="1803" height="1543">
+            </div>
+          </figure>
+
+          <figure class="capture-media-card capture-combined-video reveal">
+            <video autoplay muted loop playsinline controls preload="metadata" width="1920" height="1080" aria-label="Whole-body mobile dexterous teleoperation demonstration">
+              <source src="assets/video/teleop_video.mp4" type="video/mp4">
+              Your browser does not support embedded video. <a href="assets/video/teleop_video.mp4">Download the teleoperation video</a>.
+            </video>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section method-section alignment-section" id="method" aria-labelledby="method-title">
+      <div class="shell capture-system-shell">
+        <div class="capture-system-heading alignment-heading reveal">
+          <p class="eyebrow">Human motion, robot-ready</p>
+          <h2 id="method-title">Human-to-Robot <em>Alignment</em></h2>
+          <p class="alignment-intro">Three explicit stages bridge different bodies, control semantics, and execution speeds — without losing the coordination of whole-body motion.</p>
+        </div>
+
+        <figure class="alignment-figure reveal">
+          <img src="assets/images/human_to_robot_alignment.png" alt="Human-to-robot alignment pipeline: root-centric human motion is mapped to robot-space trajectories and temporally resampled into a robot-executable whole-body action sequence" loading="lazy" width="3583" height="1679">
+        </figure>
+
+        <div class="alignment-card-grid">
+          <article class="alignment-card reveal">
+            <span class="alignment-watermark" aria-hidden="true">1</span>
+            <h3>Embodiment<br>Alignment</h3>
+            <p class="alignment-card-copy">Express human motion in a ground-projected, pelvis-centric frame, then retarget the base, torso, head, wrists, and fingers to their robot counterparts.</p>
+            <p class="alignment-card-outcome">Preserve body-relative motion</p>
+          </article>
+          <article class="alignment-card reveal">
+            <span class="alignment-watermark" aria-hidden="true">2</span>
+            <h3>Action-Semantic<br>Alignment</h3>
+            <p class="alignment-card-copy">Convert retargeted poses into local relative transformations: how each component moves from its current state, rather than a demonstrator-specific absolute configuration.</p>
+            <p class="alignment-card-outcome">Give motion robot-native meaning</p>
+          </article>
+          <article class="alignment-card reveal">
+            <span class="alignment-watermark" aria-hidden="true">3</span>
+            <h3>Temporal<br>Alignment</h3>
+            <p class="alignment-card-copy">Resample human trajectories by normalized task progress to match robot episode length, preserving spatial paths and whole-body synchronization at the robot’s execution timescale.</p>
+            <p class="alignment-card-outcome">Match progress, not wall-clock time</p>
+          </article>
+        </div>
+
+        <div class="alignment-output reveal">
+          <p class="eyebrow">One unified policy interface</p>
+          <p>Continuous, coupled robot-compatible supervision for standard VLA policies — <strong>no human-specific action head required.</strong></p>
+        </div>
+
+        <div class="distribution-visualization reveal" aria-labelledby="distribution-title">
+          <div class="distribution-heading">
+            <p class="eyebrow">Alignment results</p>
+            <h3 id="distribution-title">Distribution Alignment Visualization</h3>
+            <p>Human and robot whole-body action distributions before and after full alignment.</p>
+          </div>
+
+          <div class="distribution-tabs" role="tablist" aria-label="Distribution visualization task">
+            <button class="is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-distribution-task="pick">Pick Chips Can</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-distribution-task="pour">Pour Water</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-distribution-task="bin">Throw Trash</button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-distribution-task="stool">Push Chair &amp; Close Laptop</button>
+          </div>
+
+          <div class="distribution-comparison" data-distribution-comparison aria-live="polite">
+            <figure class="distribution-panel">
+              <figcaption>Before Alignment</figcaption>
+              <img data-distribution-before src="assets/images/action_distribution/pick_shutiao_abs.png" alt="Pick Chips Can human and robot action distributions before alignment" width="5464" height="5464" loading="lazy" decoding="async">
+            </figure>
+            <figure class="distribution-panel">
+              <figcaption>After Full Alignment</figcaption>
+              <img data-distribution-after src="assets/images/action_distribution/pick_shutaio_retarget.png" alt="Pick Chips Can human and robot action distributions after full alignment" width="5464" height="5464" loading="lazy" decoding="async">
+            </figure>
+
+            <aside class="distribution-metrics" aria-label="Distribution distance metrics for the selected task">
+              <div class="distribution-metrics-legend" aria-label="Metric series">
+                <span><i class="is-raw"></i>Raw</span>
+                <span><i class="is-aligned"></i>Aligned</span>
+              </div>
+
+              <section class="distribution-metric-card" data-distribution-metric="mmd" aria-label="Pick Chips Can Maximum Mean Discrepancy: Raw 0.598, Aligned 0.313">
+                <div class="distribution-metric-title">
+                  <h4>MMD</h4>
+                  <span>Lower is better</span>
+                </div>
+                <div class="distribution-metric-bars">
+                  <div class="distribution-metric-column">
+                    <span class="distribution-metric-value" data-metric-value="raw">0.598</span>
+                    <i class="distribution-metric-bar is-raw" data-metric-bar="raw" style="height:74.75%"></i>
+                    <span class="distribution-metric-series">Raw</span>
+                  </div>
+                  <div class="distribution-metric-column">
+                    <span class="distribution-metric-value" data-metric-value="aligned">0.313</span>
+                    <i class="distribution-metric-bar is-aligned" data-metric-bar="aligned" style="height:39.125%"></i>
+                    <span class="distribution-metric-series">Aligned</span>
+                  </div>
+                </div>
+              </section>
+
+              <section class="distribution-metric-card" data-distribution-metric="swd" aria-label="Pick Chips Can Sliced Wasserstein Distance: Raw 0.926, Aligned 0.563">
+                <div class="distribution-metric-title">
+                  <h4>SWD</h4>
+                  <span>Lower is better</span>
+                </div>
+                <div class="distribution-metric-bars">
+                  <div class="distribution-metric-column">
+                    <span class="distribution-metric-value" data-metric-value="raw">0.926</span>
+                    <i class="distribution-metric-bar is-raw" data-metric-bar="raw" style="height:66.143%"></i>
+                    <span class="distribution-metric-series">Raw</span>
+                  </div>
+                  <div class="distribution-metric-column">
+                    <span class="distribution-metric-value" data-metric-value="aligned">0.563</span>
+                    <i class="distribution-metric-bar is-aligned" data-metric-bar="aligned" style="height:40.214%"></i>
+                    <span class="distribution-metric-series">Aligned</span>
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tasks-section deployment-section" id="deployment" aria-labelledby="deployment-title">
+      <div class="shell capture-system-shell">
+        <div class="capture-system-heading reveal">
+          <p class="eyebrow">Real-world deployment</p>
+          <h2 id="deployment-title">Real-world mobile<br><em>manipulation deployment</em></h2>
+        </div>
+
+        <h3 class="deployment-current-title reveal" data-deployment-title>Pick Chips Can</h3>
+        <div class="deployment-carousel reveal" data-deployment-carousel tabindex="0" aria-label="Task video carousel. Use the left and right arrow keys to change task.">
+          <article class="deployment-card is-active" data-deployment-card data-deployment-index="0" style="--deployment-x: 0%; --deployment-scale: 1; z-index: 10; opacity: 1; filter: none;" aria-current="true">
+            <video autoplay muted loop playsinline controls preload="metadata" width="3840" height="2160" aria-label="Pick Chips Can deployment demonstration">
+              <source src="assets/video/tasks/task_pick_chips_can.mp4" type="video/mp4">
+            </video>
+          </article>
+          <article class="deployment-card" data-deployment-card data-deployment-index="1" style="--deployment-x: 30%; --deployment-scale: .9; z-index: 9; opacity: .8; filter: blur(1px) brightness(.8);">
+            <video muted loop playsinline controls preload="metadata" width="2560" height="1440" aria-label="Pour Water deployment demonstration">
+              <source src="assets/video/tasks/task_pour_water.mp4" type="video/mp4">
+            </video>
+          </article>
+          <article class="deployment-card" data-deployment-card data-deployment-index="2" style="--deployment-x: 60%; --deployment-scale: .8; z-index: 8; opacity: .6; filter: blur(1px) brightness(.8);">
+            <video muted loop playsinline controls preload="metadata" width="2560" height="1440" aria-label="Throw Trash deployment demonstration">
+              <source src="assets/video/tasks/task_throw_trash.mp4" type="video/mp4">
+            </video>
+          </article>
+          <article class="deployment-card" data-deployment-card data-deployment-index="3" style="--deployment-x: -60%; --deployment-scale: .8; z-index: 8; opacity: .6; filter: blur(1px) brightness(.8);">
+            <video muted loop playsinline controls preload="metadata" width="2560" height="1440" aria-label="Deliver Fruit deployment demonstration">
+              <source src="assets/video/tasks/task_move_basket.mp4" type="video/mp4">
+            </video>
+          </article>
+          <article class="deployment-card" data-deployment-card data-deployment-index="4" style="--deployment-x: -30%; --deployment-scale: .9; z-index: 9; opacity: .8; filter: blur(1px) brightness(.8);">
+            <video muted loop playsinline controls preload="metadata" width="2560" height="1440" aria-label="Push Chair and Close Laptop deployment demonstration">
+              <source src="assets/video/tasks/task_push_chair.mp4" type="video/mp4">
+            </video>
+          </article>
+
+          <button class="deployment-nav deployment-nav-prev" type="button" data-deployment-nav="-1" aria-label="Show previous task">Previous</button>
+          <button class="deployment-nav deployment-nav-next" type="button" data-deployment-nav="1" aria-label="Show next task">Next</button>
+        </div>
+        <p class="deployment-status" data-deployment-status role="status" hidden></p>
+      </div>
+    </section>
+
+    <section class="section results-section" id="results" aria-labelledby="results-title">
+      <div class="shell policy-results-heading reveal">
+        <p class="eyebrow">03 · Policy learning</p>
+        <h2 id="results-title">Policy Learning Results</h2>
+        <p>Does aligned human supervision improve policy learning, and which training paradigm leverages it most effectively?</p>
+      </div>
+
+      <div class="shell policy-results-panel reveal">
+        <div class="policy-results-controls">
+          <label>
+            <span>VLA Backbone</span>
+            <select data-policy-backbone aria-label="VLA Backbone">
+              <option value="groot">GR00T N1.7</option>
+              <option value="pi">π0.5</option>
+            </select>
+          </label>
+          <label>
+            <span>Evaluation Metrics</span>
+            <select data-policy-metric aria-label="Evaluation Metrics">
+              <option value="sr">Success Rate</option>
+              <option value="tcs">Task Completion Score</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="policy-chart-heading" aria-live="polite">
+          <h3 data-policy-chart-title>GR00T N1.7 · Task Success Rate</h3>
+        </div>
+
+        <div class="policy-results-legend" aria-label="Training paradigms">
+          <span><i style="--legend-color:#bae0fe"></i>Robot Only</span>
+          <span><i style="--legend-color:#fef5ce"></i>Human-Robot Cotrain</span>
+          <span><i style="--legend-color:#fdcfb4"></i>Human Pretrain + Robot FT</span>
+          <span><i style="--legend-color:#fc9595"></i>Human Pretrain + Cotrain FT</span>
+        </div>
+
+        <div class="policy-chart-scroller">
+          <div class="policy-chart" data-policy-chart role="img" aria-label="GR00T N1.7 task success rate grouped bar chart">
+            <div class="policy-chart-y-label" data-policy-y-label>Task Success Rate</div>
+            <div class="policy-chart-scale" aria-hidden="true">
+              <span>1.0</span><span>0.8</span><span>0.6</span><span>0.4</span><span>0.2</span><span>0.0</span>
+            </div>
+            <div class="policy-chart-plot" data-policy-plot></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section results-section data-efficiency-section" id="data-efficiency" aria-labelledby="data-efficiency-title">
+      <div class="shell data-efficiency-heading reveal">
+        <p class="eyebrow">04 · Data efficiency</p>
+        <h2 id="data-efficiency-title">Robot-data efficiency<br><em>with human supervision</em></h2>
+        <p>How does aligned human data improve robot learning with limited robot demonstrations?</p>
+      </div>
+
+      <div class="shell data-efficiency-panel reveal">
+        <div class="data-efficiency-legend" role="group" aria-label="Training strategies. Select a strategy to focus its curves.">
+          <button type="button" data-efficiency-series="robot" aria-pressed="false"><i class="is-robot"></i>Robot Data</button>
+          <button type="button" data-efficiency-series="cotrain" aria-pressed="false"><i class="is-cotrain"></i>Human-Robot Cotrain</button>
+          <button type="button" data-efficiency-series="pretrain" aria-pressed="false"><i class="is-pretrain"></i>Human Pretrain + Robot FT</button>
+        </div>
+        <div class="data-efficiency-chart-scroller">
+          <div class="data-efficiency-chart" data-efficiency-chart></div>
+        </div>
+        <p class="data-efficiency-note"><strong>50% fewer robot demonstrations.</strong> With 25 robot demonstrations, human-assisted training approaches or matches the 50-demo Robot-only reference across the evaluated tasks.</p>
+      </div>
+    </section>
+
+    <div class="research-marquee" aria-hidden="true">
+      <div class="research-marquee-track">
+        <span>Continuous · Coupled · Fine-Grained · Human-to-Robot ·</span>
+        <span>Continuous · Coupled · Fine-Grained · Human-to-Robot ·</span>
+      </div>
+    </div>
+
+    <section class="proof-band" aria-label="Key results">
+      <div class="shell proof-grid">
+        <article class="proof-item reveal">
+          <span class="proof-value">29→56<small>%</small></span>
+          <p>Average success<br>on GR00T N1.7</p>
+        </article>
+        <article class="proof-item reveal">
+          <span class="proof-value">32→57<small>%</small></span>
+          <p>Average success<br>on π<sub>0.5</sub></p>
+        </article>
+        <article class="proof-item reveal">
+          <span class="proof-value">½</span>
+          <p>Robot demonstrations<br>for matched performance</p>
+        </article>
+        <article class="proof-item reveal">
+          <span class="proof-value">15/15</span>
+          <p>Transferred trajectories<br>replayed successfully</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section intro-section" id="overview" aria-labelledby="overview-title">
+      <div class="shell section-heading reveal">
+        <p class="eyebrow">01 · The idea</p>
+        <h2 id="overview-title">Preserve the motion.<br><em>Remove the mismatch.</em></h2>
+      </div>
+
+      <div class="shell intro-grid">
+        <div class="intro-thesis reveal">
+          <p class="lead">Whole-body manipulation is not a sequence of isolated skills. The base, torso, head, arms, and dexterous hands have to negotiate every moment together.</p>
+          <p>DexRoam turns portable human demonstrations into robot-compatible supervision while keeping that coordination continuous. Human and robot trajectories then train a standard vision-language-action policy through the same action interface.</p>
+        </div>
+
+        <ul class="principles reveal">
+          <li>
+            <span class="principle-number">01</span>
+            <div><h3>Continuous actions</h3><p>No discretized locomotion primitives.</p></div>
+          </li>
+          <li>
+            <span class="principle-number">02</span>
+            <div><h3>Continuous prediction</h3><p>No phase switching at deployment.</p></div>
+          </li>
+          <li>
+            <span class="principle-number">03</span>
+            <div><h3>Coupled whole body</h3><p>One unified policy output space.</p></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section takeaway-section" id="takeaway" aria-labelledby="takeaway-title">
+      <div class="shell takeaway reveal">
+        <p class="eyebrow">The takeaway</p>
+        <h2 id="takeaway-title">Human data does not replace robot data.<br><em>It makes every robot demonstration go further.</em></h2>
+        <a class="button button-light" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer">Read the full paper</a>
+      </div>
+    </section>
+
+    <section class="section citation-section" id="citation" aria-labelledby="citation-title">
+      <div class="shell citation-layout">
+        <div class="citation-copy reveal">
+          <p class="eyebrow">04 · Citation</p>
+          <h2 id="citation-title">Build on<br><em>DexRoam.</em></h2>
+          <p>If this work helps your research, please cite the paper. This temporary entry uses the metadata currently available in the draft.</p>
+        </div>
+
+        <div class="citation-code reveal">
+          <div class="code-toolbar">
+            <span>BibTeX</span>
+            <button type="button" data-copy-citation>Copy citation</button>
+          </div>
+          <pre><code id="bibtex">@misc{zhou2026dexroam,
+  title  = {DexRoam: Learning Mobile Bimanual
+            Dexterous Manipulation from Egocentric
+            Whole-Body Human Demonstrations},
+  author = {Zhou, Rui and Yuan, Yibo and Zhao, Junkai
+            and Zhao, Fangyuan and Zhao, Xiaoguang
+            and Zhang, Shanghang and Han, Sirui},
+  year   = {2026},
+  url    = {https://dexroam.github.io/}
+}</code></pre>
+          <p class="copy-status" role="status" aria-live="polite" data-copy-status></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-row">
+      <a class="brand" href="#top"><span class="brand-word">DexRoam</span><span class="brand-index">01</span></a>
+      <p>Continuous · Coupled · Fine-grained</p>
+      <p>© 2026 DexRoam</p>
+    </div>
+  </footer>
+
+</body>
+</html>

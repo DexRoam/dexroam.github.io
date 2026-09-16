@@ -1,0 +1,1346 @@
+                                                                                                                                                                                             1
+
+
+
+
+  DexRoam: Learning Mobile Bimanual Dexterous Manipulation
+             from Egocentric Whole-Body Human Demonstrations
+                        Rui Zhou1,2,∗ , Yibo Yuan3,2,∗ , Junkai Zhao2,∗ , Fangyuan Zhao4 ,
+                                                                       B            B
+                            Xiaoguang Zhao5 , Shanghang Zhang4,2, , Sirui Han1,
+        1 The Hong Kong University of Science and Technology 2 Beijing Academy of Artificial Intelligence
+  3 State Key Laboratory of Multimedia Information Processing, School of Computer Science, Peking University
+                   4 Beihang University 5 Institute of Automation, Chinese Academy of Sciences
+                                   ∗ Equal contribution, B Corresponding author
+
+                                        Project Page: dexroam.github.io
+         Egocentric Whole-Body                                                                                                                  Whole-Body Robot
+           Human Motion Data                                                                                                                      Action Data
+                                                         Embodiment / Action-Semantic / Temporal Alignment
+
+
+                                Egocentric RGB                                                                                      Robot Observation
+
+
+
+
+                        Whole-body Human Motion
+                                                         Continuous·Coupled·Fine-Grained                                          Whole-Body Robot Action
+                                                         Whole-Body Human-to-Robot Transfer
+        (a) Human-Robot Action Distribution Alignment                 (b) Unified Whole-                                            (c) Improved Robot Learning
+                                                                       Body Supervision
+
+
+                                                                         Human-Robot
+                                                                          Alignment
+
+
+
+
+                                                               Unified Whole-Body Action Supervision
+
+
+
+
+                                                                                             Robot             50% Fewer Robot Demonstrations        Consistent Gains Across VLA Backbones
+         Raw distribution         Aligned distribution                      VLA Policy       Action
+
+   Figure 1. Overview of the DexRoam framework. DexRoam unlocks motion-level human data for mobile bimanual dexterous
+   manipulation by transforming egocentric whole-body demonstrations into continuous, coupled robot-compatible action supervision.
+   Through explicit embodiment, action-semantic, and temporal alignment, DexRoam substantially closes the human–robot action
+   distribution gap and consistently improves policy learning across VLA backbones, while reducing robot demonstration requirements.
+   Abstract—Mobile bimanual dexterous manipulation requires                                            or motion trackers. We then perform three explicit alignment
+continuous coordination of locomotion, whole-body motion, and                                          stages—embodiment, action-semantic, and temporal—to map
+finger-level dexterity within a single trajectory, creating a severe                                   captured motion into the robot action space, preserving fine-
+robot demonstration bottleneck. Egocentric human demonstra-                                            grained whole-body motion and allowing human and robot
+tions offer a scalable alternative, but prior approaches ease the                                      demonstrations to be jointly learned by standard VLA policies.
+transfer by simplifying human motion, discarding exactly the                                           Real-world experiments with different VLA backbones show
+fine-grained, coupled structure such tasks depend on. We present                                       that human demonstrations consistently improve policy learning
+DexRoam, a complete system for learning mobile bimanual                                                across training paradigms, raising average success from 29%
+dexterous manipulation from human demonstrations, in which                                             to 56% on GR00T N1.7 and from 32% to 57% on π0.5 , while
+whole-body motion remains continuous and coupled throughout                                            matching robot-only training with half the robot demonstrations.
+the human-to-robot transfer process. To enable scalable collection                                     Ablations confirm that each alignment stage is necessary. These
+of whole-body human manipulation demonstrations, we develop                                            results highlight the potential of human demonstrations for
+a tracker-free capture system using only a consumer VR headset                                         scalable whole-body mobile manipulation with preserved fine-
+and a head-mounted stereo camera, without external cameras                                             grained motion structure.
+                                                                                                                                  2
+
+
+
+                      I. I NTRODUCTION                             motion into discrete or low-dimensional representations can
+                                                                   remove fine-grained motion variations, preventing policies
+   Mobile bimanual dexterous manipulation requires robots
+                                                                   from fully exploiting the structure in human demonstrations.
+to simultaneously perform locomotion, torso adjustment, bi-
+                                                                   Second, decomposing long-horizon behaviors into independent
+manual coordination, active vision, and finger-level dexter-
+                                                                   phases can weaken dependencies between different stages of
+ous interaction within a single trajectory. Unlike isolated
+                                                                   execution, making it difficult to jointly learn locomotion and
+manipulation or locomotion, these tasks require continuous
+                                                                   upper-body manipulation within a unified policy. For example,
+coordination among multiple body components throughout
+                                                                   separating navigation and manipulation limits the ability to
+execution. Training such systems therefore demands large-
+                                                                   perform tasks requiring tightly coupled arm–base coordination.
+scale, high-quality whole-body action data. However, collect-
+                                                                   Finally, in mobile bimanual manipulation, the motion of one
+ing robot demonstrations at this scale remains challenging
+                                                                   body component often changes the feasible workspace and
+as robot embodiments become increasingly complex. Exist-
+                                                                   control constraints of others. Representing the base, torso,
+ing mobile manipulation platforms, such as Human Support
+                                                                   arms, and hands as independent control objectives ignores
+Robot [1] and Stretch [2], provide important foundations for
+                                                                   these interactions, limiting the ability to learn the whole-body
+embodied intelligence, while recent whole-body teleoperation
+                                                                   coordination required for mobile dexterous manipulation.
+systems extend data collection toward bimanual and humanoid
+manipulation through bilateral interfaces, kinematic-matched          This raises the central question of this work: Can human
+platforms, and wearable devices [3]–[6]. Nevertheless, these       demonstrations be transferred to robots while resolving
+approaches require increasingly specialized hardware inter-        embodiment mismatch and preserving the fine-grained mo-
+faces, making large-scale data collection for mobile bimanual      tion structure required for complex whole-body behaviors?
+dexterous robots expensive and difficult to scale.                    We present DexRoam (Fig. 1), a complete system that
+   Egocentric human demonstrations provide a scalable al-          answers this question by learning mobile bimanual dexterous
+ternative for alleviating the robot data bottleneck. Large-        manipulation from human demonstrations end to end, spanning
+scale egocentric datasets have revealed rich human activ-          portable egocentric capture, explicit whole-body human-to-
+ity priors [7]–[9], while recent systems enable collecting         robot alignment, and real-robot policy learning. The system
+robot-relevant human demonstrations through scalable inter-        is built around a single design principle: the continuous,
+faces [10]–[13]. Building on these advances, recent works          coupled structure of whole-body motion is carried from the
+demonstrate that human demonstrations can directly improve         demonstrator’s body to the robot’s action chunks without
+robot policy learning for dexterous manipulation [14]–[16], bi-    discretized locomotion primitives, phase decomposition, or
+manual manipulation [17], and vision-language-action models        independent per-component control. Each stage is designed so
+trained from egocentric data [18]. However, directly transfer-     that the continuous, coupled structure of whole-body motion
+ring the full human motion space to robots remains challenging     survives from the demonstrator’s body to the robot’s action.
+due to differences in morphology, control interfaces, and             The first stage is a tracker-free egocentric whole-body
+execution timescales between humans and robots.                    capture system. It recovers whole-body human motion to-
+   To reduce this transfer difficulty, prior human-to-robot        gether with egocentric video using only a consumer VR
+works often simplify or restructure human motion represen-         headset and a head-mounted stereo camera, requiring no
+tations before policy learning. Instead of directly transferring   external cameras, environment markers or body-worn trackers.
+the complete human motion space, these approaches introduce        The camera stream is displayed inside the headset in real
+structured intermediate representations that reduce embodi-        time, so the demonstrator’s view during collection is exactly
+ment discrepancies and make robot learning more tractable.         the observation the policy later sees. This keeps collection
+Recent mobile whole-body manipulation systems adopt dif-           portable and scalable, while providing raw whole-body motion
+ferent forms of such representation transformations, including     in human space as the input to the rest of the system.
+simplified locomotion and hand representations [19], phase-           The second stage is explicit human-to-robot alignment,
+based decomposition of navigation and manipulation [20], and       which brings this motion into the robot’s action space with-
+controller-assisted whole-body execution through task-level        out compressing it. Three mismatches are resolved in turn.
+targets [21]–[24]. Other approaches avoid directly transferring    Embodiment mismatch, from structural differences between
+human actions and instead leverage human videos for repre-         humans and robots, is handled by root-centric whole-body
+sentation learning or foundation model pretraining [25]–[28].      retargeting. Action-semantic mismatch, between human motion
+   These representation transformations reduce the complex-        representations and robot control interfaces, is handled by
+ity of human–robot transfer, but they inherently introduce         robot-centric relative action construction. Temporal mismatch,
+a trade-off between transferability and preserving human           from the different execution timescales of humans and robots,
+motion information. This trade-off is often acceptable for         is handled by task-progress temporal resampling. After align-
+robots with limited action complexity and weak whole-body          ment, human and robot demonstrations occupy the same
+coupling, but becomes restrictive for mobile bimanual dex-         observation–action space, so a standard VLA policy trains on
+terous manipulation, where successful execution requires con-      both jointly, without human-specific action heads, and directly
+tinuous coordination among locomotion, upper-body motion,          predicts complete whole-body action chunks.
+and dexterous interaction. Specifically, existing approaches          We validate the full pipeline on a real mobile bimanual
+face several limitations. First, compressing continuous human      dexterous robot across five manipulation tasks, two VLA
+                                                                                                                                   3
+
+
+
+backbones, and varying robot-data budgets. Transferred human        consumable by a single policy without human-specific action
+trajectories replay on the robot with centimeter-level error        heads; the second ensures the transferred data do not pull
+and no IK failures, and alignment substantially reduces the         the policy away from the action distribution it encounters at
+human–robot action distribution gap. Training on the aligned        deployment. Only under both conditions can R(Dhuman ) and
+data improves policy performance consistently across tasks          Drobot be trained on jointly under a single objective. We define
+and backbones, and matches robot-only training with half the        the policy as πθ (At | It , Pt , ℓ), where the policy receives
+robot demonstrations. Ablations show that removing action-          an egocentric visual observation It , a proprioceptive state
+semantic or temporal alignment substantially degrades the           history Pt , and a language instruction ℓ, and outputs a con-
+policy, confirming that each stage is necessary for the pipeline    tinuous whole-body action chunk At ∈ A. After alignment,
+to work. Our contributions are:                                     transformed human demonstrations join the training corpus D
+• DexRoam, a complete working system for learning mobile            alongside robot demonstrations, enabling joint learning under
+  bimanual dexterous manipulation from human demonstra-             the same policy and action interface.
+  tions, integrating portable egocentric capture, explicit whole-
+  body alignment, and real-robot policy learning under a                                   III. D EX ROAM
+  single continuous, coupled action interface.                         In this section, we present DexRoam. Sec. III-A introduces
+• A tracker-free egocentric whole-body capture system that
+                                                                    the data collection system, Sec. III-B presents the three-stage
+  records full-body motion, hand articulation, and egocentric       alignment addressing embodiment, action-semantic, and tem-
+  stereo video with only a consumer VR headset and a head-          poral mismatches, and Sec. III-B4 describes policy learning
+  mounted camera, with in-headset streaming that keeps the          under the unified observation–action interface.
+  demonstrator’s view consistent with the policy observation.
+• An explicit three-stage alignment resolving embodiment,
+  action-semantic, and temporal mismatches while preserving         A. Hardware Platform and Data Collection System
+  continuous whole-body motion structure, so that human and            1) Hardware platform: The Astribot–XHand platform
+  robot data are interchangeable for a standard VLA policy.         comprises an omnidirectional mobile base, an actuated torso,
+• Extensive real-world evaluation across five tasks, two VLA        two 7-DoF arms, a 2-DoF active head, and two 12-DoF XHand
+  backbones, and different robot-data budgets, covering tra-        dexterous hands (Fig. 2a, right), supporting coordinated whole-
+  jectory executability, distribution alignment, policy improve-    body mobile dexterous manipulation.
+  ment, data efficiency, and ablations.                                2) Robot demonstration collection: We build a whole-body
+                                                                    teleoperation system (Fig. 2a) for collecting robot demonstra-
+                  II. P ROBLEM D EFINITION                          tions on the target mobile bimanual dexterous platform. The
+                                                                    Meta Quest 3S captures upper-body poses, VR controllers
+   We study the transfer of human demonstrations to mobile          provide wrist pose commands, and MANUS Pro gloves cap-
+bimanual dexterous robots. We define the robot whole-body           ture hand motions, with these inputs jointly mapped to the
+action space as A, spanning the mobile base, torso, dual            robot base, end-effectors, and XHand joints, enabling cou-
+arms, active head, and dexterous hands, and require that the        pled whole-body mobile dexterous teleoperation. The system
+transferred demonstrations satisfy a fine-grained whole-body        adopts a single-operator control paradigm, where the operator
+action interface with three properties: (1) Continuous action       simultaneously controls robot locomotion and whole-body
+space. All action dimensions remain continuous rather than          manipulation, eliminating the need for an additional operator
+being discretized. (2) Temporally continuous prediction. The        dedicated to base navigation. Since wearing gloves makes con-
+complete action sequence is continuously predicted by a single      ventional keyboard or button-based interaction inconvenient,
+policy, without phase switching at deployment. (3) Coupled          we further design a gesture-based interface for episode state
+whole-body prediction. Actions of all body components               management, allowing the operator to start, stop, save, and
+are jointly modeled in a unified policy output space, rather        discard episode directly through hand gestures.
+than being treated as independent control objectives during
+                                                                       3) Tracker-free egocentric whole-body data collection:
+deployment. Under this setting, we study how to effectively
+                                                                    Human demonstrations are captured with only a Meta Quest
+transfer human demonstrations to mobile bimanual dexterous
+                                                                    3 headset and a head-mounted ZED Mini stereo camera
+robots while satisfying the above action interface constraints.
+                                                                    (Fig. 2b), requiring no external motion-capture cameras, no
+   The training corpus consists of two sources: robot demon-        environment markers and no body-worn trackers. The Meta
+strations Drobot collected on the target embodiment, whose          Quest 3 captures whole-body motion through WebXR [29],
+actions already lie in A, and human demonstrations Dhuman ,         including 6-DoF headset pose, 33 body-joint poses, and 25
+whose motions reside in human space. We therefore require a         hand landmarks per hand, which together form the whole-body
+human-to-robot transformation R satisfying two conditions:          human state ht . Meanwhile, the ZED Mini records egocentric
+        R(Dhuman ) ⊂ S,         pR(Dhuman ) ≈ pDrobot ,             stereo RGB images with timestamps, providing first-person
+                                                                    visual observations for each demonstration. Fig. 2b (right)
+  where S is the observation–action space of the target             shows a captured whole-body mobile manipulation trajectory,
+embodiment, whose action component A satisfies the three            in which head pose, hand keypoints, and the full-body skeleton
+properties above. The first condition makes both sources            evolve continuously as the demonstrator moves through the
+                                                                                                                                                                           4
+
+
+
+
+                                                                                                                      Captured Whole-Body Mobile Manipulation Trajectory
+
+
+
+
+                                                                                               Real-Time Egocentric
+                                                                                                  RGB Streaming
+                           Meta Quest 3S
+
+                                                                                                 ZED Mini Camera
+
+
+
+
+                              VR Controller                                                       Meta Quest 3
+
+
+
+                                                                                                         Head Pose
+
+
+                                                                                                            Hand
+                                                                                                          Keypoints
+
+
+                                                                                                       33 Full-Body
+                                                                                                       Joint Poses
+                        MANUS Pro Gloves
+
+
+
+                                                                                              Whole-Body Tracking
+
+              (a) Follow-style Mobile Dexterous Teleoperation               (b) Tracker-Free Egocentric Whole-Body Human Data Capture System
+
+Fig. 2. DexRoam data collection system. (a) Follow-style teleoperation lets one operator drive base, torso, arms, head, and dexterous hands simultaneously
+via a Meta Quest 3S, VR controllers, and MANUS Pro gloves, with gesture-based episode management. (b) Tracker-free egocentric capture uses a Meta Quest
+3 and a head-mounted ZED Mini to record 6-DoF head pose, 33 body joints, 25 joints per hand, and timestamped egocentric stereo RGB, with no external
+cameras, marker or trackers. Real-time in-headset video streaming keeps the demonstrator’s view identical to the policy observation.
+scene. A gesture-based interface is also designed for episode                               xt = ΠG \Wf
+                                                                                                        pelvis,t , y t = zH × x t ,
+management, allowing the operator to start, stop, save, and
+                                                                                                      xt yt zH ΠG W ppelvis,t
+                                                                                                                              
+discard recordings directly through gestures.                                               W
+                                                                                              TH,t =
+                                                                                                       0 0 0            1
+   The key design choice of the capture system is egocentric
+video streaming: the ZED Mini stream is displayed inside                      Aligned with the robot base motion plane, FH establishes
+the headset in real time (Fig. 2b), so what the operator                      a human-centric reference frame shared by locomotion and
+sees during collection is exactly the egocentric observation                  manipulation. It serves two purposes: transferring the human
+used later for policy training. This keeps visual observation,                locomotion trajectory to the robot chassis motion and rep-
+visual attention, and motor intent consistent throughout an                   resenting upper-body movements as body-relative trajectories,
+episode. Such consistency is important for mobile dexterous                   reducing dependence on global scene coordinates. Specifically,
+manipulation, where the viewpoint continuously changes as                     torso motion, head orientation, and wrist trajectories are ex-
+the robot moves its base, body, and head.                                     pressed in FH through
+                                                                                                   H
+                                                                                                       TJ,t = (W TH,t )−1 W TJ,t ,
+
+B. Human-to-Robot Alignment                                                   where J ∈ {chest, head, l−wrist, r−wrist}. The resulting
+                                                                              relative trajectories are then converted into robot commands:
+   DexRoam instantiates the human-to-robot transformation R                   the human root trajectory is mapped to the chassis motion, the
+through three explicit alignment steps(Fig. 3), which resolve                 chest pose is used as the torso target, and the left/right wrist
+embodiment, action-semantic, and temporal mismatches be-                      poses are transformed into arm end-effector targets. For the
+tween human demonstrations and robot execution spaces.                        head, although its pose is represented in FH , only the yaw and
+   1) Embodiment Alignment: Humans and robots have dif-                       pitch components are extracted as the 2-DoF head command
+ferent kinematic trees, so neither joint angles nor global poses              due to the robot’s mechanical constraints. Fig. 3b illustrates
+can be copied directly into an executable action. To reduce                   the resulting per-component trajectories in robot space. For the
+dependence on global coordinate frames and preserve body-                     dexterous hands, we adopt dex-retargeting [30] to retarget hu-
+relative motion structure, we introduce a time-varying pelvis-                man hand poses into the 12-DoF XHand commands, bridging
+centric root frame FH to align human motion with the robot                    the morphology gap between human and robot hands.
+embodiment. The origin of FH is the orthogonal projection                        2) Action-Semantic Alignment: Retargeting yields poses,
+of the pelvis onto the ground plane (Projection in Fig. 3a);                  not actions: the goal is not merely to reach the robot’s pose
+its forward axis is the horizontal projection of the pelvis’s                 space, but to construct targets carrying the same semantics as
+local forward direction, and its vertical axis points opposite to             robot control. Absolute poses fail this test, as they still encode
+gravity. Let zH = −W d g denote the upward axis of the human                  demonstrator-specific configuration such as height, shoulder
+                    W
+root frame, where g is the gravity vector expressed in the                    width, arm length, and initial posture. We therefore express
+world frame. The ground-plane projection operator is defined                  continuous motion as relative transformations in each body
+as ΠG = I − zH z⊤  H . Assuming that the world origin lies on                 component’s local frame, which specify how a component
+the ground plane, the pose of FH is defined as:                               moves from where it currently is rather than where it should
+                                                                                                                                                                                              5
+
+
+
+
+    Body Components                   Head            Torso      Wrists        Root/Chassis                        Trajectory Representations    Human          Aligned           Resampled
+                        τ𝑁𝑁𝑟𝑟 −2              τ𝑁𝑁𝑟𝑟
+             τ𝑁𝑁𝑟𝑟 −3              τ𝑁𝑁𝑟𝑟 −1                                                                                                         𝑡𝑡𝑁𝑁ℎ−6         𝑡𝑡
+                                                                                     τ𝑁𝑁𝑟𝑟 −2              τ𝑁𝑁𝑟𝑟                                            𝑡𝑡𝑁𝑁ℎ−4 𝑁𝑁ℎ−2     𝑡𝑡𝑁𝑁ℎ
+                                                                          τ𝑁𝑁𝑟𝑟 −3              τ𝑁𝑁𝑟𝑟 −1                                               𝑡𝑡𝑁𝑁ℎ−5 𝑡𝑡𝑁𝑁 −3 𝑡𝑡𝑁𝑁ℎ−1
+                                                                                                                                                                  ℎ
+
+
+
+
+                                                          Human–Robot                                                               Temporal
+                                                          Embodiment                                                               Resampling
+                                                           Alignment                                                                Nh → Nr
+
+     Projection
+
+
+
+
+          (a) Root-Centric Human Motion                                   (b) Aligned Robot-Space Motion                                        (c) Robot-Executable Action Sequence
+
+Fig. 3. Explicit human-to-robot alignment in DexRoam. (a) Human motion is expressed in a pelvis-centric root frame projected onto the ground plane,
+yielding root/chassis, torso, wrist, and head trajectories free of global scene coordinates. (b) Embodiment alignment maps each component to its robot
+counterpart, and action-semantic alignment re-expresses the results as robot-centric relative transformations. (c) Temporal alignment resamples Nh human
+steps into Nr waypoints evenly spaced in task progress, matching the execution timescale of robot demonstrations.
+be in absolute coordinates, and are thus independent of the                                        with Nh the original human trajectory length. After resam-
+configuration in which the demonstration was recorded. For                                         pling, the two sources advance the same fraction of task
+upper-body components, poses are already represented in the                                        progress per policy step, as illustrated in Fig. 3c. The resam-
+human root frame FH , we compute the relative motion for                                           pled waypoints preserve the original spatial trajectory while
+J ∈ {chest, l−wrist, r−wrist} as                                                                   matching the temporal distribution of robot executions.. Posi-
+                                                                                                   tions are interpolated linearly and rotations by SLERP, while
+                         ∆TJt = (H TJ,t )−1H TJ,t+1                                                images and discrete signals use nearest-neighbor matching;
+                                                                                                   base yaw is unwrapped before interpolation to avoid discon-
+The resulting local transformations describe how each com-
+                                                                                                   tinuities around ±π. Resampling only adjusts the temporal
+ponent evolves from its current state and preserve transferable
+                                                                                                   discretization of the trajectories and does not modify the robot
+motion patterns such as reaching, lifting, and retracting.
+                                                                                                   control frequency or action chunk size.
+  For locomotion, the root frame encodes the human move-
+ment. We compute the relative transformation between con-                                             After alignment, human and robot demonstrations become
+secutive root frames and represent it as planar motion:                                            interchangeable under the same policy interface. The resulting
+                                                                                                   action representation satisfies the three properties defined in
+                −1W                                    ⊤
+  ∆TH    W
+    t = ( TH,t )    TH,t+1 , ∆ξ H
+                                t = [∆xt , ∆yt , ∆ψt ]                                             Sec. I. First, all actions remain continuous without discretiza-
+                                                                                                   tion. Second, the complete whole-body trajectory is predicted
+Since FH is constructed on the ground plane with a gravity-                                        by a single policy without phase-based execution. Third, all
+aligned vertical axis, its relative motion is inherently planar.                                   body components are jointly represented in one unified action
+Compared with absolute trajectories, this representation re-                                       space. This unified interface enables human demonstrations
+moves dependence on scene coordinates and initial positions                                        to retain their fine-grained motion structure while becoming
+while providing explicit locomotion semantics, enabling con-                                       executable in the robot action space.
+tinuous coupling between base movement and whole-body
+manipulation. The 2-DoF head command and the 12-DoF hand                                              4) Policy Learning: Because aligned human data and
+command already lie in robot joint space and are used directly.                                    robot data share the same observation–action space, they can
+                                                                                                   be directly consumed by a standard VLA policy without
+   3) Temporal Alignment: We align demonstrations by task                                          human-specific action heads or input branches. We instantiate
+progress rather than wall-clock time. Humans complete the                                          πθ (At |It , Pt , ℓ) with two VLA backbones, GR00T N1.7 [31]
+same task faster and in fewer steps than the robot, so the                                         and π0 .5 [32]. Each policy takes egocentric RGB observa-
+two advance task progress at different rates per policy step.                                      tions, proprioceptive state history, and language instructions
+We resample each retargeted human trajectory into N̄r evenly                                       as inputs, and predicts whole-body action chunks. We design
+spaced waypoints in normalized task progress s ∈ [0, 1], where                                     three strategies for incorporating aligned human demonstra-
+N̄r is the mean robot episode length for that task:                                                tions into policy learning: Human–Robot Cotrain, jointly
+                                                          k−1                                      training on aligned human and robot demonstrations; Human
+     T̃k = Interp(T1:Nh , sk ), sk =                             , 1 ≤ k ≤ N̄r                     Pretrain + Robot FT, pretraining on aligned human demon-
+                                                         N̄r − 1
+                                                                                                                                                         6
+
+
+
+
+      Pick Chips Can
+      Pour Water
+      Throw Trash
+      Deliver Fruit
+    Close Laptop
+    Push Chair &
+
+
+
+
+Fig. 4. Real-world mobile bimanual dexterous manipulation tasks. Rollouts of the five evaluation tasks, one per row: Pick Chips Can, Pour Water, Throw
+Trash, Deliver Fruit, and Push Chair & Close Laptop. They span fine-grained dexterity, base–manipulation coupling, and long-horizon whole-body interaction.
+strations and finetuning on robot demonstrations only; and                       2) Evaluation protocol: We evaluate DexRoam at three
+Human Pretrain + Cotrain FT, pretraining on aligned human                      complementary levels: trajectory executability, human–robot
+demonstrations and finetuning on the human–robot mixture.                      action distribution alignment, and policy performance.
+All strategies use the same observation–action interface and                   Trajectory replay. We directly replay transferred human
+downstream finetuning budget.                                                  trajectories on the real robot and report trajectory completion,
+                                                                               IK failure rate, and positional and rotational replay errors for
+                         IV. E XPERIMENTS                                      the torso, arms, and head.
+A. Experimental Setup                                                          Action distribution alignment. We further examine whether
+   1) Tasks: We evaluate DexRoam on five tasks covering                        the alignment process brings human-derived actions closer to
+complementary mobile manipulation capabilities (Fig. 4). Pick                  real robot actions. For each task, we compare the human
+Chips Can requires the robot to navigate to a table, grasp a                   and robot whole-body action distributions at the retargeted-
+chips can, and place it in a tray, emphasizing precise reaching                absolute stage and after full alignment. We use Maximum
+and finger-level grasping. Pour Water requires grasping a cup                  Mean Discrepancy (MMD) and Sliced Wasserstein Distance
+and pouring into a target container, testing continuous wrist–                 (SWD) for quantitative comparison and PCA for qualitative
+hand coordination. Throw Trash requires grasping an object,                    visualization. Detailed normalization, metric computation, and
+moving to a bin, and releasing it accurately; the object must                  visualization protocols are provided in the Appendix.
+remain stable during locomotion, while successful disposal                     Policy evaluation. We evaluate all four training settings
+depends on precise coordination between base positioning and                   described in Sec. IV-A on all five tasks, with 20 real-world
+manipulation. Deliver Fruit requires carrying a basket bi-                     trials per task. Success rate (SR) captures whether the final
+manually to a target workstation, stressing bimanual transport                 task goal is achieved, but provides limited information about
+and coordinated turning during locomotion. Push Chair &                        partial progress, particularly for mobile manipulation tasks.
+Close Laptop chains long-range navigation, contact-rich chair                  We therefore additionally use task completion score (TCS),
+pushing, and laptop closing, testing long-horizon execution                    which decomposes each task into ordered stages and measures
+together with continuous base–upper-body coordination and                      the fraction of stages completed. Detailed TCS criteria are
+fine manipulation.                                                             provided in the Appendix. We report both SR and TCS
+                                                                                                                                                                                                        7
+
+
+Raw Data Distribution
+Aligned Data Distribution
+
+
+
+
+            Pick Chips Can                             Pour Water                            Throw Trash              Push Chair & Close Laptop
+   Fig. 5. Human–robot action distribution before and after alignment. PCA visualization of whole-body actions on representative tasks. Top: retargeted
+   absolute human actions and robot actions before action-semantic and temporal alignment, which occupy clearly separated regions. Bottom: fully aligned
+   robot-centric relative actions, where the two distributions largely overlap, with marginals shown along each axis.
+
+                                                 Maximum Mean Discrepancy (MMD)                                      TABLE I: Real-robot replay of transferred human trajectories. Position
+                                                                 Raw       Aligned                                   and rotation errors of retargeted human motions across different body com-
+Distribution Gap
+
+
+
+
+                    0.8
+                                0.598            0.631           0.628                                               ponents, measured in millimeters (mm) and degrees (°).
+                                                                                     0.585           0.553
+                    0.6
+
+                                                         0.384                               0.413
+                    0.4                                                  0.359                                       Component Metric       Pick Chips Can Pour Water Throw Trash Average
+                                        0.313
+                                                                                                             0.274
+                    0.2
+                                                                                                                                 Position        13.49           11.82           12.31          12.54
+                                                                                                                     Torso
+                    0.0                                                                                                          Rotation        2.32             1.64            1.57           1.84
+                                Pick Chips Can   Pour Water      Throw Trash         Deliver Fruit   Push Chair &
+                                                                                                     Close Laptop
+                                                                                                                                 Position        3.75            4.27            4.02           4.01
+                                                 Sliced Wasserstein Distance (SWD)                                   Left Arm
+                                                                                                                                 Rotation        0.51            0.58            0.57           0.55
+                                                 1.277
+                                                                 Raw       Aligned
+Distribution Gap
+
+
+
+
+                     1.2
+                                                                 1.004               1.008
+                                                                                                     0.940
+                                                                                                                                 Position        5.30            5.93            7.67           6.30
+                                0.926
+                                                         0.860
+                                                                                                                     Right Arm
+                                                                         0.729                               0.719
+                                                                                                                                 Rotation        0.70            0.84            1.22           0.92
+                    0.8                                                                      0.684
+                                        0.563
+                                                                                                                     Head        Rotation        1.22            1.36            1.53           1.37
+                    0.4
+
+                                                                                                                     Completed                    5/5             5/5             5/5           15/15
+                    0.0
+                                Pick Chips Can   Pour Water      Throw Trash         Deliver Fruit   Push Chair &
+                                                                                                     Close Laptop    TABLE II: Tracker-free vs. tracker-based capture. Retargeting accuracy
+                                                                                                                     averaged over 15 trajectories across three tasks. Position and rotation errors
+   Fig. 6. Quantitative human–robot action distribution alignment. MMD                                               are reported in millimeters and degrees, respectively.
+   and SWD between human-derived and robot whole-body actions on all five
+   tasks, lower values indicate closer distributions. Alignment reduces both                                              Human Motion              Torso        Left Arm        Right Arm       Head
+   metrics on every task, by 41.7% in MMD and 31.1% in SWD on average.                                                      Capture              Pos. Rot.      Pos. Rot.       Pos. Rot.        Rot.
+
+   for downstream policy evaluation. Based on these evaluation                                                         Tracker-free (Ours)  12.54        1.84   4.01     0.55   6.30     0.92    1.37
+   metrics, we investigate when, how, and why aligned human                                                          PICO + Motion Trackers 13.16        2.06   4.12     0.57   5.63     0.81    1.23
+   demonstrations benefit mobile bimanual dexterous manipula-
+   tion. Specifically, we study four questions:                                                                      B. Q1: Transfer Quality
+
+                            • Q1: Transfer Quality. How effectively does human-to-                                      1) Action distribution alignment.: We examine whether
+                              robot transfer convert human motion into executable and                                the transferred human supervision is compatible with the
+                              distribution-aligned robot training data?                                              action distribution of the real robot. Across all five tasks,
+                            • Q2: Policy Learning. Does aligned human supervision
+                                                                                                                     alignment consistently reduces both distribution metrics, de-
+                              improve policy learning, and which training paradigm                                   creasing MMD by 41.7% and SWD by 31.1% on average
+                              leverages it most effectively?                                                         (Fig. 6). The PCA visualization in Fig. 5 shows the same
+                            • Q3: Data Efficiency. How does aligned human data im-
+                                                                                                                     qualitative trend, with substantially greater overlap between
+                              prove robot learning with limited robot demonstrations?                                human-derived and robot actions after alignment. Together
+                            • Q4: Alignment Analysis. How do different alignment
+                                                                                                                     with the replay results, these findings show that DexRoam
+                              choices affect fine-grained human-to-robot transfer?                                   produces human supervision that is not only executable on
+                                                                                                                     the target embodiment, but also better matched to real robot
+                                                                                                                                                                                                                                                                                                                                                                                                         8
+
+
+
+                                                                             GR00T N1.7 Task Success Rate                                                                                                                                                                     GR00T N1.7 Task Completion Score
+                    1.0                                                                                                                                                                                                    1.0                        0.96
+                                                                                                                                                                                                                                                                                                              0.92
+                                               0.90
+                                                                                                                                                                                                                                        0.86                                      0.86
+                                                                                                                                                                                                                                                                                                  0.83 0.83
+                                                                                                                                                                                                                                                                    0.80 0.80              0.80
+                    0.8                                                                                 0.75                                                                                                               0.8                 0.74
+                                                                                                                                                                                                                                                                                                                                                                                                  0.77
+
+
+
+
+                                                                                                                                                                                                   Task Completion Score
+                                 0.70                                                                                                                                                                                                                                                                                                     0.71                                      0.70
+Task Success Rate
+
+
+
+
+                                                                                                                                                                                                                                                             0.67                                                                                                                          0.67
+                                        0.65                               0.65                                                                                                                                                                                                                                             0.64 0.64
+                                                                                                                                                                                                                                 0.63
+                                                             0.60                                0.60
+                    0.6                                             0.55                  0.55                                                                                              0.56                           0.6                                                                                                                                               0.56
+                          0.50                                                                                                                                                                                                                                                                                       0.49
+                                                                                                                                                                              0.46
+                                                                                                                                                                                     0.42                                                                                                                                                                             0.42
+                                                                                   0.40                                                                                                                                                                                                                                                                 0.40
+                    0.4                               0.35                                                                                                                                                                 0.4
+                                                                                                                                                                                                                                                                                                                                                               0.33
+                                                                                                                                                                       0.29
+                                                                                                                                    0.25          0.25          0.25
+                                                                                                                      0.20                                                                                                                                                                                                                       0.19
+                    0.2                                                                                                      0.15                        0.15                                                              0.2
+                                                                                                               0.10                        0.10
+
+
+                    0.0                                                                                                                                                                                                    0.0
+                            Pick Chips                       Throw                        Deliver               Push Chair &                      Pour                    Average                                                  Pick Chips                       Throw                         Deliver             Push Chair &                      Pour                    Average
+                               Can                           Trash                         Fruit                Close Laptop                      Water                                                                               Can                           Trash                          Fruit              Close Laptop                      Water
+
+                                                                                   PI0.5 Task Success Rate                                                                                                                                                                               PI0.5 Task Completion Score
+                    1.0                                                                                                                                                                                                    1.0
+                                                                                                                                                                                                                                                                                                         0.90 0.89
+                                                                                                                                                                                                                                               0.85 0.84                                          0.86
+                                                                                                                                                                                                                                                                                  0.84
+                                                                                                                                                                                                                                                                    0.81
+                                                                                                                                                                                                                                                                           0.79
+                    0.8                 0.75 0.75                                                       0.75                                                                                                               0.8                                                             0.74
+
+
+
+
+                                                                                                                                                                                                   Task Completion Score
+                                                                                                                                                                                                                                                                                                                                                                                                  0.73
+                                                                                          0.70 0.70                                                                                                                                                                                                                                                                                        0.69
+Task Success Rate
+
+
+
+
+                                                                                                                                                                                                                                        0.66                                                                                                                                        0.67
+                                                             0.65          0.65
+                                                                                                                                                                                                                                                                                                                            0.61          0.62
+                                                                                   0.60                                                                                                                                          0.60                        0.59                                                                  0.59
+                    0.6                                             0.55
+                                                                                                                                                                                            0.57                           0.6
+                                                                                                                                                                                                                                                                                                                                                                             0.52
+                                 0.50                                                                                                                                         0.49 0.49                                                                                                                              0.48
+                                                                                                                                                                                                                                                                                                                                                                      0.44
+                                                                                                                                                                                                                                                                                                                                                        0.42
+                          0.40                                                                                                      0.40
+                    0.4                               0.35                                                                   0.35                                                                                          0.4                                                                                                                                 0.34
+                                                                                                                                                                       0.32
+                                                                                                                      0.30                        0.30          0.30
+
+                                                                                                               0.20                                                                                                                                                                                                                              0.19
+                    0.2                                                                                                                                                                                                    0.2
+                                                                                                                                                         0.10
+                                                                                                                                           0.05
+
+                    0.0                                                                                                                                                                                                    0.0
+                            Pick Chips                       Throw                        Deliver               Push Chair &                      Pour                    Average                                                  Pick Chips                       Throw                         Deliver             Push Chair &                      Pour                    Average
+                               Can                           Trash                         Fruit                Close Laptop                      Water                                                                               Can                           Trash                          Fruit              Close Laptop                      Water
+
+                                                                                  Robot Only                             Human-Robot Cotrain                                            Human Pretrain + Robot FT                                                                 Human Pretrain + Cotrain FT
+
+   Fig. 7. Main policy learning results. Main policy learning results. Success rate (SR, left) and task completion score (TCS, right) of Robot-only and
+   three human-assisted training strategies on five real-world tasks, for GR00T N1.7 (top) and π0.5 (bottom). All three human-assisted strategies improve over
+   Robot-only on every task and both backbones, with Human Pretrain + Cotrain FT best or tied-best on every task–backbone combination.
+
+   actions.                                                                                                                                                                                                          policy backbone, or manipulation setting. This remains true
+      2) Real-robot executability.: All 15 transferred human                                                                                                                                                         on Push Chair & Close Laptop, the longest-horizon and most
+   trajectories replay successfully on the real robot with no IK                                                                                                                                                     tightly coupled task, where the best human-assisted setting
+   failures (Tab. I). Across the three tasks, positional replay errors                                                                                                                                               improves success by 15 percentage points on GR00T N1.7
+   remain at approximately the centimeter scale for the torso and                                                                                                                                                    and 20 percentage points on π0.5 . Together, these results
+   millimeter scale for both arms, while rotational errors remain                                                                                                                                                    show that aligned human supervision provides a broadly useful
+   within a few degrees across all evaluated body components.                                                                                                                                                        learning signal for mobile bimanual dexterous manipulation.
+   Despite the different whole-body motion patterns involved, the                                                                                                                                                       The magnitude of the gain, however, depends on how the
+   transferred trajectories can therefore be consistently executed                                                                                                                                                   human supervision is used. Human Pretrain + Cotrain FT
+   by the target robot, supporting their use as robot supervision.                                                                                                                                                   achieves the highest average performance on both backbones
+      3) Tracker-free capture fidelity.: Since tracker-free human                                                                                                                                                    and is best or tied-best on every task–backbone combination.
+   motion capture is a key component of our data collection                                                                                                                                                          This suggests that using human data both to initialize task-
+   system, we further examine whether this lightweight design                                                                                                                                                        relevant behavior and to retain human supervision during
+   compromises the quality of the transferred trajectories. For                                                                                                                                                      subsequent human–robot cotraining makes the most effective
+   comparison, we construct a tracker-based counterpart using a                                                                                                                                                      use of the transferred demonstrations.
+   PICO headset with five Motion Trackers and evaluate it under                                                                                                                                                         Qualitatively, we also observe that human supervision can
+   the same replay protocol. Both systems successfully replay all                                                                                                                                                    introduce useful motion variations absent from the robot
+   trajectories and achieve comparable replay errors across body                                                                                                                                                     demonstrations. On Pick Chips Can, the Robot-only policy
+   components, with no systematic performance gap (Tab. II).                                                                                                                                                         predominantly approaches the can from the front and often
+   This suggests that our tracker-free system substantially reduces                                                                                                                                                  knocks it over when its orientation is perturbed. With human
+   sensing cost and wearable burden while preserving the quality                                                                                                                                                     supervision, the policy can instead adopt a side approach when
+   required for subsequent human-to-robot transfer.                                                                                                                                                                  appropriate, selecting different grasp motions according to
+                                                                                                                                                                                                                     the object orientation. Since this side-grasp pattern is absent
+   C. Q2: Policy Learning                                                                                                                                                                                            from the robot demonstrations but present in the human data,
+                                                                                                                                                                                                                     the behavior provides a concrete example of how human
+     Relative to Robot-only, all three human-assisted training                                                                                                                                                       supervision can expand the motion patterns available to the
+   paradigms improve both SR and TCS across both VLA                                                                                                                                                                 learned policy.
+   backbones and all five tasks (Fig. 7). In terms of average
+   SR, the three paradigms provide gains of +16, +11, and +27
+   percentage points on GR00T N1.7, and +17, +17, and +25                                                                                                                                                            D. Q3: Data Efficiency
+   percentage points on π0.5 . The same positive trend holds
+   across individual tasks, indicating that the benefit of aligned                                                                                                                                                     We fix 50 human demonstrations per task, vary the number
+   human supervision is not tied to a particular training paradigm,                                                                                                                                                  of robot demonstrations over {0, 10, 25, 50}, and evaluate
+                                                                                                                                                                                                   9
+
+
+
+                                        Pick Chips                      Throw Trash                         Basket
+                     100                                                                                                     TABLE III: Ablation of alignment stages. GR00T N1.7 success rate.
+GR00T N1.7 Success Rate
+
+
+
+
+                          80
+                                                                                                                                                                 w/o Temporal   Absolute DexRoam
+                          60                                                                                                 Task        Strategy
+                                                                                                                                                                  Resampling     Action   (Ours)
+                          40
+
+                                                                                                                                         Cotrain                     0.65        0.00      0.70
+                          20                                                                                                 Pick
+                                                                                                                                         Pretrain + FT               0.30        0.00      0.65
+                           0                                                                                                 Chips Can
+                               0   10      25           50    0    10       25           50    0     10      25         50
+                                                                                                                                         Pretrain + Cotrain FT       0.20        0.00      0.90
+                                        Robot Demos                      Robot Demos                      Robot Demos
+                                        Pick Chips                      Throw Trash                         Basket
+                     100                                                                                                                 Cotrain                     0.40        0.00      0.65
+                                                                                                                             Throw
+                          80                                                                                                             Pretrain + FT               0.50        0.00      0.55
+Pi0.5 Success Rate
+
+
+
+
+                                                                                                                             Trash
+                          60
+                                                                                                                                         Pretrain + Cotrain FT       0.60        0.00      0.65
+                          40
+
+
+                          20                                                                                                 fact that absolute poses map human and robot demonstrations
+                           0
+                               0   10      25           50    0    10       25           50    0     10      25         50
+                                                                                                                             into a shared coordinate representation while still retaining
+                                        Robot Demos                      Robot Demos                      Robot Demos
+                                           Robot Data        Human-Robot Cotrain       Human Pretrain Robot FT               a substantial amount of human-specific information. During
+                                                                                                                             training, these factors pull the supervision signal away from
+Fig. 8. Robot-data efficiency with human supervision. Success rate under
+robot demonstration budgets of {0, 10, 25, 50} with 50 human demonstrations                                                  the robot action distribution the policy will face at deployment,
+fixed per task. With aligned human data, success rises sharply once only a                                                   so the policy learns targets entangled with human-specific
+few robot demonstrations are available, and 25 already approach or match the                                                 configurations rather than a stable robot control semantics.
+50-demo Robot-only baseline.
+                                                                                                                                This distribution shift is further amplified over closed-loop
+different human supervision training strategies, with Robot-                                                                 execution. At the start of an episode, the robot’s initial observa-
+only using 50 robot demonstrations as the reference (Fig. 8).                                                                tion o0 = (I0 , P0 ) lies within the distribution of the robot data,
+   1) Human data reduces robot data requirements: With                                                                       so the first predicted chunk a0:H−1 still exhibits a plausible
+only 25 robot demonstrations, human-assisted training on                                                                     execution trend. However, because the training distribution has
+GR00T N1.7 already matches or exceeds the 50-demo Robot-                                                                     been pulled toward that of human-specific absolute actions, the
+only baseline on all three tasks, effectively reducing the                                                                   model biases its predicted targets toward the demonstrator’s
+required robot demonstrations by 50%. On π0.5 , the same                                                                     absolute configurations and incurs a small error. Executing
+25-demo setting remains within 5 percentage points of the 50-                                                                this error drives the next observation oH = (IH , PH ) off
+demo Robot-only baseline. These results show that aligned hu-                                                                the training distribution, which in turn makes the following
+man supervision substantially improves robot-data efficiency,                                                                chunk aH:2H−1 more erroneous. Repeated over an episode,
+enabling comparable policy performance with fewer robot                                                                      this forms a self-amplifying feedback loop that eventually
+demonstrations.                                                                                                              drives the robot into a state from which it cannot recover,
+   2) Few-shot robot data activates human priors: With no                                                                    and the task fails.
+robot demonstrations, neither human-assisted strategy achieves                                                                  Among the three strategies, Human Pretrain + Robot FT
+any task success. However, performance rises sharply once                                                                    exhibits this behavior to a somewhat lesser degree under the
+only 10 robot demonstrations are introduced. This suggests                                                                   absolute-action setting, since finetuning on robot data pulls the
+that aligned human data provides useful task and motion priors                                                               learned distribution partly back toward the robot’s own. The
+that can be activated with only a small amount of robot-specific                                                             finetuning budget, however, is not sufficient to recover it fully,
+supervision. At the same time, the failure of the human-only                                                                 and the resulting policy still completes no trials.
+setting shows that human data amplifies rather than replaces                                                                    2) Temporal alignment improves policy learning: Remov-
+robot data: robot demonstrations remain necessary to ground                                                                  ing task-progress temporal resampling reduces the average
+the policy in the target embodiment and execution domain.                                                                    success rate from 68.3% to 44.2%, a drop of 24.1 percentage
+   The two training paradigms also exhibit different scaling                                                                 points (Tab. III). This degradation is caused by the different
+behavior. Cotrain generally improves more steadily as robot                                                                  execution timescales of human and robot demonstrations:
+data increases, whereas Human Pretrain + Robot FT is less                                                                    without resampling, the same task progress can correspond to
+stable. We hypothesize that finetuning exclusively on a limited                                                              different future action chunks, introducing temporally incon-
+robot dataset can partially overfit to the small robot distribution                                                          sistent supervision. Task-progress temporal resampling aligns
+and weaken the diversity introduced during human pretrain-                                                                   human and robot trajectories at the same execution phase,
+ing, while cotraining continuously retains human supervision                                                                 removing this temporal mismatch.
+throughout optimization.
+
+                                                                                                                             F. Generalization Under Distribution Shift
+E. Q4: Alignment Analysis
+                                                                                                                                We additionally evaluate two distribution shifts on Pick
+   We ablate the two alignment stages that can be removed in                                                                 Chips Can — a changed background scene and an unseen
+isolation, on Pick Chips Can and Throw Trash (Tab. III).                                                                     instruction phrasing. As shown in Fig. 9, we observe consistent
+   1) Absolute actions fail without semantic alignment: Re-                                                                  improvements under both background and instruction shifts.
+placing DexRoam’s robot-centric relative action representa-                                                                  For background shift, Robot-only drops from 50% to 20%,
+tion with absolute retargeted poses causes the policy to fail                                                                while Human Pretrain + Cotrain FT decreases from 90% to
+completely: success is 0% on both tasks and under all three                                                                  55%, maintaining the highest robustness in the novel scene.
+training strategies (Tab. III). We attribute this failure to the                                                             For instruction shift, strategies that retain human data during
+                                                                                                                                                             10
+
+
+
+                                                                                    learns cross-embodiment visual or task representations [25],
+                                                                                    [26], [47], expresses behavior through transferable affor-
+                                                                                    dances, flow, or point trajectories [48]–[51], or translates and
+                                                                                    retargets human data into robot-compatible observations and
+                                                                                    actions [52]–[59]. For mobile whole-body learning, recent
+                                                                                    systems often make transfer tractable through discrete lo-
+                                                                                    comotion commands, phase-aware policies, decoupled base
+                  Original Scene                         Novel Scene
+                                                                                    and manipulation actions, or end-effector and keypoint targets
+                                                                                    executed by downstream controllers [19]–[24], [60]. These
+                                                                                    abstractions improve compatibility but may omit part of the
+                                                                                    original coupled motion. DexRoam instead explicitly aligns
+                                                                                    embodiment, action semantics, and task progress while retain-
+                                                                                    ing a continuous, temporally uninterrupted, jointly predicted
+                                                                                    base–torso–arm–head–hand action space.
+
+
+                                                                                    C. Human Demonstrations for Robot Learning
+Fig. 9. Generalization under distribution shift. Evaluation on Pick Chips
+Can under the original setting, a novel scene, and an unseen instruction               Human demonstrations provide diverse behavioral priors at
+phrasing. The images above show the original and novel scenes. Human-               substantially lower collection cost than robot teleoperation.
+assisted training degrades far less than Robot-only under both shifts, especially
+when human data is retained during finetuning.                                      Large egocentric datasets have progressed from first-person ac-
+                                                                                    tivities and hand–object interactions to paired viewpoints, met-
+finetuning, including Cotrain and Human Pretrain + Cotrain                          ric geometry, full-body motion, and robot-oriented dexterous
+FT, remain largely stable, with only 7% and 6% relative de-                         trajectories [7]–[9], [61]–[66]. Early work mainly extracted
+clines, respectively. These results suggest that aligned human                      reusable representations or rewards, whereas portable inter-
+supervision improves robustness beyond the training distribu-                       faces and transfer pipelines now convert human experience
+tion, particularly when human data continues to participate                         into policy supervision for fixed-base, bimanual, and dexterous
+during policy optimization.                                                         manipulation [10]–[18], [25], [26], [67]–[71]. Human-centric
+                                                                                    VLA and world-model pretraining further scale this idea
+                          V. R ELATED W ORK                                         across data sources and embodiments [72]–[76]. More re-
+                                                                                    cently, EMMA, EgoHumanoid, HoMMI, HuMI, BifrostUMI,
+A. Mobile Manipulation                                                              HALOMI, HERMES, WARP, and OpenHLM extend human
+   Mobile manipulation requires navigation, whole-body                              supervision to mobile or whole-body policies [19]–[24], [44],
+reachability, and object interaction to be coordinated over                         [46], [57]. Preserving mobile, bimanual, and finger-level co-
+spatially extended tasks. Accessible platforms and data sys-                        ordination in one robot-native policy interface nevertheless
+tems have progressed from Stretch and Mobile ALOHA to                               remains comparatively underexplored.
+integrated or modular whole-body pipelines such as Tidy-
+Bot++, BRS, TeleMoMa, MoMa-Teleop, HoMeR, and Su-                                                                R EFERENCES
+perSuit [2], [3], [33]–[38]. Humanoid systems including                              [1] T. Yamamoto, K. Terada, A. Ochiai, F. Saito, Y. Asahara, and K. Murase,
+HumanPlus, HOMIE, TWIST/TWIST2, HumanoidExo, and                                         “Development of human support robot as the research platform of a
+Teleopit further extend teleoperation and policy learning to                             domestic mobile manipulator,” ROBOMECH Journal, vol. 6, 04 2019.
+                                                                                     [2] C. C. Kemp, A. Edsinger, H. M. Clever, and B. Matulevich,
+locomotion, posture, active vision, and dexterous hands [4],                             “The design of stretch: A compact, lightweight mobile manipulator
+[5], [39]–[42]. Beyond collection interfaces, generalist and                             for indoor human environments,” 2022. [Online]. Available: https:
+whole-body VLA or world-action models such as GR00T                                      //arxiv.org/abs/2109.10892
+                                                                                     [3] Z. Fu, T. Z. Zhao, and C. Finn, “Mobile aloha: Learning bimanual
+N1, PanoVLA, Ψ0 , OpenHLM, and ω-0 increasingly address                                  mobile manipulation with low-cost whole-body teleoperation,” 2024.
+language-conditioned bimanual, wheeled, and humanoid loco-                               [Online]. Available: https://arxiv.org/abs/2401.02117
+manipulation [28], [31], [43]–[45]. HERMES also targets                              [4] Q. Ben, F. Jia, J. Zeng, J. Dong, D. Lin, and J. Pang, “Homie:
+                                                                                         Humanoid loco-manipulation with isomorphic exoskeleton cockpit,”
+mobile bimanual dexterity but connects learned manipulation                              2025. [Online]. Available: https://arxiv.org/abs/2502.13013
+skills to a separate navigation module [46]. Despite this                            [5] R. Zhong, Y. Sun, J. Wen, J. Li, C. Cheng, W. Dai, Z. Zeng, H. Lu,
+progress, many systems still require robot-in-the-loop collec-                           Y. Zhu, and Y. Xu, “Humanoidexo: Scalable whole-body humanoid
+                                                                                         manipulation via wearable exoskeleton,” 2025. [Online]. Available:
+tion, specialized interfaces, or substantial embodiment-specific                         https://arxiv.org/abs/2510.03022
+robot data, motivating scalable robot-free demonstrations for                        [6] R. Zhong, C. Cheng, J. Xu, Y. Wei, C. Guo, D. Zhang, W. Dai,
+continuous whole-body learning.                                                          and H. Lu, “Nuexo: A wearable exoskeleton covering all upper limb
+                                                                                         rom for outdoor data collection and teleoperation of humanoid robots,”
+                                                                                         2025. [Online]. Available: https://arxiv.org/abs/2503.10554
+B. Human-Robot Alignment                                                             [7] K. Grauman, A. Westbury, E. Byrne, Z. Chavis, A. Furnari, R. Girdhar,
+                                                                                         J. Hamburger, H. Jiang, M. Liu, X. Liu, M. Martin, T. Nagarajan,
+  Transferring human demonstrations to robots requires re-                               I. Radosavovic, S. K. Ramakrishnan, F. Ryan, J. Sharma, M. Wray,
+                                                                                         M. Xu, E. Z. Xu, C. Zhao, S. Bansal, D. Batra, V. Cartillier, S. Crane,
+solving differences in visual observations, morphology, action                           T. Do, M. Doulaty, A. Erapalli, C. Feichtenhofer, A. Fragomeni, Q. Fu,
+semantics, dynamics, and execution speed. Existing work                                  A. Gebreselasie, C. Gonzalez, J. Hillis, X. Huang, Y. Huang, W. Jia,
+                                                                                                                                                           11
+
+
+
+     W. Khoo, J. Kolar, S. Kottur, A. Kumar, F. Landini, C. Li, Y. Li,          [25] S. Nair, A. Rajeswaran, V. Kumar, C. Finn, and A. Gupta, “R3m: A
+     Z. Li, K. Mangalam, R. Modhugu, J. Munro, T. Murrell, T. Nishiyasu,             universal visual representation for robot manipulation,” 2022. [Online].
+     W. Price, P. R. Puentes, M. Ramazanova, L. Sari, K. Somasundaram,               Available: https://arxiv.org/abs/2203.12601
+     A. Southerland, Y. Sugano, R. Tao, M. Vo, Y. Wang, X. Wu, T. Yagi,         [26] Y. J. Ma, S. Sodhani, D. Jayaraman, O. Bastani, V. Kumar, and
+     Z. Zhao, Y. Zhu, P. Arbelaez, D. Crandall, D. Damen, G. M. Farinella,           A. Zhang, “Vip: Towards universal visual reward and representation
+     C. Fuegen, B. Ghanem, V. K. Ithapu, C. V. Jawahar, H. Joo, K. Kitani,           via value-implicit pre-training,” 2023. [Online]. Available: https:
+     H. Li, R. Newcombe, A. Oliva, H. S. Park, J. M. Rehg, Y. Sato, J. Shi,          //arxiv.org/abs/2210.00030
+     M. Z. Shou, A. Torralba, L. Torresani, M. Yan, and J. Malik, “Ego4d:       [27] S. Ye, J. Jang, B. Jeon, S. Joo, J. Yang, B. Peng, A. Mandlekar, R. Tan,
+     Around the world in 3,000 hours of egocentric video,” 2022. [Online].           Y.-W. Chao, B. Y. Lin, L. Liden, K. Lee, J. Gao, L. Zettlemoyer,
+     Available: https://arxiv.org/abs/2110.07058                                     D. Fox, and M. Seo, “Latent action pretraining from videos,” 2025.
+ [8] D. Damen, H. Doughty, G. M. Farinella, S. Fidler, A. Furnari,                   [Online]. Available: https://arxiv.org/abs/2410.11758
+     E. Kazakos, D. Moltisanti, J. Munro, T. Perrett, W. Price, and M. Wray,    [28] S. Wei, H. Jing, B. Li, Z. Zhao, J. Mao, Z. Ni, S. He,
+     “The epic-kitchens dataset: Collection, challenges and baselines,” 2020.        J. Liu, X. Liu, K. Kang, S. Zang, W. Yuan, M. Pavone,
+     [Online]. Available: https://arxiv.org/abs/2005.00343                           D. Huang, and Y. Wang, “ψ0 : An open foundation model towards
+ [9] Y. Liu, Y. Liu, C. Jiang, K. Lyu, W. Wan, H. Shen, B. Liang,                    universal humanoid loco-manipulation,” 2026. [Online]. Available:
+     Z. Fu, H. Wang, and L. Yi, “Hoi4d: A 4d egocentric dataset for                  https://arxiv.org/abs/2603.12263
+     category-level human-object interaction,” 2024. [Online]. Available:       [29] G. Yang, “VUER: An event-driven, declarative visualization toolkit
+     https://arxiv.org/abs/2203.01577                                                for genai and robotics,” 2025. [Online]. Available: https://github.com/
+[10] C. Wang, H. Shi, W. Wang, R. Zhang, L. Fei-Fei, and C. K. Liu,                  vuer-ai/vuer
+     “Dexcap: Scalable and portable mocap data collection system for            [30] Y. Qin, W. Yang, B. Huang, K. Van Wyk, H. Su, X. Wang, Y.-W. Chao,
+     dexterous manipulation,” 2024. [Online]. Available: https://arxiv.org/          and D. Fox, “Anyteleop: A general vision-based dexterous robot arm-
+     abs/2403.07788                                                                  hand teleoperation system,” in Robotics: Science and Systems, 2023.
+[11] C. Chi, Z. Xu, C. Pan, E. Cousineau, B. Burchfiel, S. Feng,                [31] NVIDIA, J. Bjorck, N. C. Fernando Castañeda, X. Da, R. Ding, L. J.
+     R. Tedrake, and S. Song, “Universal manipulation interface: In-the-wild         Fan, Y. Fang, D. Fox, F. Hu, S. Huang, J. Jang, Z. Jiang, J. Kautz,
+     robot teaching without in-the-wild robots,” 2024. [Online]. Available:          K. Kundalia, L. Lao, Z. Li, Z. Lin, K. Lin, G. Liu, E. Llontop, L. Magne,
+     https://arxiv.org/abs/2402.10329                                                A. Mandlekar, A. Narayan, S. Nasiriany, S. Reed, Y. L. Tan, G. Wang,
+[12] S. Chen, C. Wang, K. Nguyen, L. Fei-Fei, and C. K. Liu,                         Z. Wang, J. Wang, Q. Wang, J. Xiang, Y. Xie, Y. Xu, Z. Xu, S. Ye,
+     “Arcap: Collecting high-quality human demonstrations for robot                  Z. Yu, A. Zhang, H. Zhang, Y. Zhao, R. Zheng, and Y. Zhu, “GR00T
+     learning with augmented reality feedback,” 2024. [Online]. Available:           N1: An open foundation model for generalist humanoid robots,” in ArXiv
+     https://arxiv.org/abs/2410.08464                                                Preprint, March 2025.
+[13] X. Cheng, J. Li, S. Yang, G. Yang, and X. Wang, “Open-television:          [32] P. Intelligence, K. Black, N. Brown, J. Darpinian, K. Dhabalia,
+     Teleoperation with immersive active visual feedback,” 2024. [Online].           D. Driess, A. Esmail, M. Equi, C. Finn, N. Fusai, M. Y. Galliker,
+     Available: https://arxiv.org/abs/2407.01512                                     D. Ghosh, L. Groom, K. Hausman, B. Ichter, S. Jakubczak, T. Jones,
+[14] C. Yuan, R. Zhou, M. Liu, Y. Hu, S. Wang, L. Yi, C. Wen, S. Zhang,              L. Ke, D. LeBlanc, S. Levine, A. Li-Bell, M. Mothukuri, S. Nair,
+     and Y. Gao, “Motiontrans: Human vr data enable motion-level                     K. Pertsch, A. Z. Ren, L. X. Shi, L. Smith, J. T. Springenberg,
+     learning for robotic manipulation policies,” 2025. [Online]. Available:         K. Stachowicz, J. Tanner, Q. Vuong, H. Walke, A. Walling,
+     https://arxiv.org/abs/2509.17759                                                H. Wang, L. Yu, and U. Zhilinsky, “π0.5 : a vision-language-action
+[15] R. Zheng, D. Niu, Y. Xie, J. Wang, M. Xu, Y. Jiang, F. Castañeda,              model with open-world generalization,” 2025. [Online]. Available:
+     F. Hu, Y. L. Tan, L. Fu, T. Darrell, F. Huang, Y. Zhu,                          https://arxiv.org/abs/2504.16054
+     D. Xu, and L. Fan, “Egoscale: Scaling dexterous manipulation               [33] J. Wu, W. Chong, R. Holmberg, A. Prasad, Y. Gao, O. Khatib, S. Song,
+     with diverse egocentric human data,” 2026. [Online]. Available:                 S. Rusinkiewicz, and J. Bohg, “Tidybot++: An open-source holonomic
+     https://arxiv.org/abs/2602.16710                                                mobile manipulator for robot learning,” 2024. [Online]. Available:
+[16] T. Tao, M. K. Srirama, J. J. Liu, K. Shaw, and D. Pathak, “Dexwild:             https://arxiv.org/abs/2412.10447
+     Dexterous human interactions for in-the-wild robot policies,” 2026.        [34] Y. Jiang, R. Zhang, J. Wong, C. Wang, Y. Ze, H. Yin, C. Gokmen,
+     [Online]. Available: https://arxiv.org/abs/2505.07813                           S. Song, J. Wu, and L. Fei-Fei, “Behavior robot suite: Streamlining
+[17] H. Bi, L. Wu, T. Lin, H. Tan, Z. Su, H. Su, and J. Zhu, “H-rdt:                 real-world whole-body manipulation for everyday household activities,”
+     Human manipulation enhanced bimanual robotic manipulation,” 2025.               2025. [Online]. Available: https://arxiv.org/abs/2503.05652
+     [Online]. Available: https://arxiv.org/abs/2507.23523                      [35] S. Dass, W. Ai, Y. Jiang, S. Singh, J. Hu, R. Zhang, P. Stone,
+[18] R. Yang, Q. Yu, Y. Wu, R. Yan, B. Li, A.-C. Cheng, X. Zou,                      B. Abbatematteo, and R. Martı́n-Martı́n, “Telemoma: A modular and
+     Y. Fang, X. Cheng, R.-Z. Qiu, H. Yin, S. Liu, S. Han, Y. Lu,                    versatile teleoperation system for mobile manipulation,” 2024. [Online].
+     and X. Wang, “Egovla: Learning vision-language-action models                    Available: https://arxiv.org/abs/2403.07869
+     from egocentric human videos,” 2025. [Online]. Available: https:           [36] D. Honerkamp, H. Mahesheka, J. O. von Hartz, T. Welschehold, and
+     //arxiv.org/abs/2507.12440                                                      A. Valada, “Whole-body teleoperation for mobile manipulation at zero
+[19] M. Shi, S. Peng, J. Chen, H. Jiang, Y. Li, D. Huang, P. Luo, H. Li,             added cost,” 2025. [Online]. Available: https://arxiv.org/abs/2409.15095
+     and L. Chen, “Egohumanoid: Unlocking in-the-wild loco-manipulation         [37] P. Sundaresan, R. Malhotra, P. Miao, J. Yang, J. Wu, H. Hu,
+     with robot-free egocentric demonstration,” 2026. [Online]. Available:           R. Antonova, F. Engelmann, D. Sadigh, and J. Bohg, “Homer: Learning
+     https://arxiv.org/abs/2602.10106                                                in-the-wild mobile manipulation via hybrid imitation and whole-body
+[20] L. Y. Zhu, P. Kuppili, R. Punamiya, P. Aphiwetsa, D. Patel, S. Kareer,          control,” 2025. [Online]. Available: https://arxiv.org/abs/2506.01185
+     S. Ha, and D. Xu, “Emma: Scaling mobile manipulation via egocentric        [38] T. Chen, H. Wu, J. Wang, X. Li, Z. Jin, and L. Fang, “Supersuit: An
+     human data,” 2025. [Online]. Available: https://arxiv.org/abs/2509.04443        isomorphic bimodal interface for scalable mobile manipulation,” 2026.
+[21] X. Xu, J. Park, H. Zhang, E. Cousineau, A. Bhat, J. Barreiros,                  [Online]. Available: https://arxiv.org/abs/2603.06280
+     D. Wang, J. Bohg, and S. Song, “Hommi: Learning whole-body mobile          [39] Z. Fu, Q. Zhao, Q. Wu, G. Wetzstein, and C. Finn, “Humanplus:
+     manipulation from human demonstrations,” 2026. [Online]. Available:             Humanoid shadowing and imitation from humans,” 2024. [Online].
+     https://arxiv.org/abs/2603.03243                                                Available: https://arxiv.org/abs/2406.10454
+[22] Z. Zhao, Y. Zhao, G. Zhang, C. Liu, M. Zheng, and W. Lian,                 [40] Y. Ze, Z. Chen, J. P. Araújo, Z. ang Cao, X. B. Peng, J. Wu, and
+     “Halomi: Learning humanoid loco-manipulation with active perception             C. K. Liu, “Twist: Teleoperated whole-body imitation system,” 2025.
+     from human demonstrations,” 2026. [Online]. Available: https:                   [Online]. Available: https://arxiv.org/abs/2505.02833
+     //arxiv.org/abs/2606.18772                                                 [41] Y. Ze, S. Zhao, W. Wang, A. Kanazawa, R. Duan, P. Abbeel,
+[23] H. Wang, C. Yu, Y. Hu, J. Zhang, Y. Li, and                                     G. Shi, J. Wu, and C. K. Liu, “TWIST2: Scalable, portable, and
+     S. Luo, “Bifrostumi: Bridging robot-free demonstrations and                     holistic humanoid data collection system,” 2025. [Online]. Available:
+     humanoid whole-body manipulation,” 2026. [Online]. Available:                   https://arxiv.org/abs/2511.02832
+     https://arxiv.org/abs/2605.03452                                           [42] B. Wu, Z. Xu, X. Fan, D. Li, and X. Huang, “Teleopit: A full-
+[24] R. Nai, B. Zheng, J. Zhao, H. Zhu, S. Dai, Z. Chen, Y. Hu, Y. Hu,               embodiment humanoid teleoperation system,” 2026. [Online]. Available:
+     T. Zhang, C. Wen, and Y. Gao, “Humanoid manipulation interface:                 https://arxiv.org/abs/2608.01834
+     Humanoid whole-body manipulation from robot-free demonstrations,”          [43] D. Yang, H. Chen, X. Chen, L. Liu, M. Li, C. Tu, K. Xu,
+     2026. [Online]. Available: https://arxiv.org/abs/2602.06643                     X. Ma, and S. Liu, “Learning panorama-aware VLA for mobile
+                                                                                                                                                          12
+
+
+
+     manipulation with whole-body teleoperation,” 2026. [Online]. Available:   [64] R. Hoque, P. Huang, D. J. Yoon, M. Sivapurapu, and J. Zhang,
+     https://arxiv.org/abs/2608.02257                                               “Egodex: Learning dexterous manipulation from large-scale egocentric
+[44] Y. Hu, H. Zhu, B. Zheng, Y. Hu, T. Zhang, Z. Chen, J. Zhao,                    video,” 2026. [Online]. Available: https://arxiv.org/abs/2505.11709
+     R. Nai, and Y. Gao, “Openhlm: An empirical recipe for whole-              [65] R. Punamiya, S. Kareer, Z. Liu, J. Citron, R.-Z. Qiu, X. Cai et al.,
+     body humanoid loco-manipulation,” 2026. [Online]. Available: https:            “Egoverse: An egocentric human dataset for robot learning from around
+     //arxiv.org/abs/2606.22174                                                     the world,” 2026. [Online]. Available: https://arxiv.org/abs/2604.07607
+[45] Z. Li, Z. Zhang, Y. Wei, W. Zhang, X. Yuan, P. Zhi, G. Li, X. Guo,        [66] Z. Li, B. Yang, C. Miao, K. Zhu, H. Chen, Q. Guan et al., “Open-aoe:
+     F. Gao, J. Yang, and S. Zhang, “ω-0: A latent predictive world action          An open egocentric manipulation dataset and toolchain for embodied
+     model for concurrent humanoid loco-manipulation,” 2026. [Online].              learning,” 2026. [Online]. Available: https://arxiv.org/abs/2607.14183
+     Available: https://arxiv.org/abs/2608.06375                               [67] S. Kareer, D. Patel, R. Punamiya, P. Mathur, S. Cheng, C. Wang,
+[46] Z. Yuan, T. Wei, L. Gu, P. Hua, T. Liang, Y. Chen, and H. Xu,                  J. Hoffman, and D. Xu, “Egomimic: Scaling imitation learning via
+     “HERMES: Human-to-robot embodied learning from multi-source                    egocentric video,” 2024. [Online]. Available: https://arxiv.org/abs/2410.
+     motion data for mobile dexterous manipulation,” 2025. [Online].                24221
+     Available: https://arxiv.org/abs/2508.20085                               [68] V. Liu, A. Adeniji, H. Zhan, S. Haldar, R. Bhirangi, P. Abbeel, and
+[47] K. Zakka, A. Zeng, P. Florence, J. Tompson, J. Bohg, and D. Dwibedi,           L. Pinto, “Egozero: Robot learning from smart glasses,” 2025. [Online].
+     “XIRL: Cross-embodiment inverse reinforcement learning,” 2021.                 Available: https://arxiv.org/abs/2505.20290
+     [Online]. Available: https://arxiv.org/abs/2106.03911                     [69] M. Xu, H. Zhang, Y. Hou, Z. Xu, L. Fan, M. Veloso, and
+                                                                                    S. Song, “Dexumi: Using human hand as the universal manipulation
+[48] S. Bahl, R. Mendonca, L. Chen, U. Jain, and D. Pathak, “Affordances
+                                                                                    interface for dexterous manipulation,” 2025. [Online]. Available:
+     from human videos as a versatile representation for robotics,” 2023.
+                                                                                    https://arxiv.org/abs/2505.21864
+     [Online]. Available: https://arxiv.org/abs/2304.08488
+                                                                               [70] Y. Liu, S. Cheng, X. Yin, W. C. Shin, A. Cueva, Y. Yang, Z. Chen,
+[49] C. Yuan, C. Wen, T. Zhang, and Y. Gao, “General flow as foundation             C. Zhang, and D. Xu, “Egoengine: From egocentric human videos to
+     affordance for scalable robot learning,” 2024. [Online]. Available:            high-fidelity dexterous robot demonstrations,” 2026. [Online]. Available:
+     https://arxiv.org/abs/2401.11439                                               https://arxiv.org/abs/2606.12604
+[50] J. Ren, P. Sundaresan, D. Sadigh, S. Choudhury, and J. Bohg,              [71] T. Yu, J. Wu, D. Li, B. Chen, H. Liu, X. Ma, and H. Liu,
+     “Motion tracks: A unified representation for human-robot transfer              “SEED-UMI: Sharing the exoskeleton between human and robot
+     in few-shot imitation learning,” 2025. [Online]. Available: https:             for one-to-one dexterous demonstration,” 2026. [Online]. Available:
+     //arxiv.org/abs/2501.06994                                                     https://arxiv.org/abs/2609.11753
+[51] Y. Han, L. Liu, Y. Gu, Y. Lu, H. Wang, S. Wai, I. Myrie, Q. Zhang,        [72] H. Luo, Y. Feng, W. Zhang, S. Zheng, Y. Wang, H. Yuan,
+     J. Yu, and G. Li, “A4A: Cross-embodiment transfer of action-oriented           J. Liu, C. Xu, Q. Jin, and Z. Lu, “Being-h0: Vision-language-action
+     4D affordances from human demonstrations,” 2026. [Online]. Available:          pretraining from large-scale human videos,” 2025. [Online]. Available:
+     https://arxiv.org/abs/2609.05892                                               https://arxiv.org/abs/2507.15597
+[52] S. Xie, H. Cao, Z. Weng, Z. Xing, H. Chen, S. Shen, J. Leng,              [73] H. Luo, Y. Wang, W. Zhang, S. Zheng, Z. Xi, C. Xu, H. Xu,
+     Z. Wu, and Y.-G. Jiang, “Human2robot: Learning robot actions                   H. Yuan, C. Zhang, Y. Wang, Y. Feng, and Z. Lu, “Being-h0.5: Scaling
+     from paired human-robot videos,” 2025. [Online]. Available: https:             human-centric robot learning for cross-embodiment generalization,”
+     //arxiv.org/abs/2502.16587                                                     2026. [Online]. Available: https://arxiv.org/abs/2601.12993
+[53] H. Li, I. Zhang, R. Ouyang, X. Wang, Z. Zhu, Z. Yang, Z. Zhang,           [74] H. Luo, W. Zhang, Y. Feng, S. Zheng, H. Xu, C. Xu, Z. Xi, Y. Fu,
+     B. Wang, C. Ni, W. Qin et al., “Mimicdreamer: Aligning human                   and Z. Lu, “Being-h0.7: A latent world-action model from egocentric
+     and robot demonstrations for scalable VLA training,” 2025. [Online].           videos,” 2026. [Online]. Available: https://arxiv.org/abs/2605.00078
+     Available: https://arxiv.org/abs/2509.22199                               [75] X. Cai, R.-Z. Qiu, G. Chen, L. Wei, I. Liu, T. Huang, X. Cheng,
+[54] Y. Wang, P. Lin, X.-H. Chen, H. Yuan, Z. Liang, Y. Huang, A. Chen,             and X. Wang, “In-n-on: Scaling egocentric manipulation with
+     Z. Lei, J. Zhang, T. Zhang et al., “Ego2robot: Scalable robot data             in-the-wild and on-task data,” 2025. [Online]. Available: https:
+     synthesis from egocentric human data,” 2026. [Online]. Available:              //arxiv.org/abs/2511.15704
+     https://arxiv.org/abs/2608.02580                                          [76] B. Li, X. Yin, M. Lin, Y. Zhang, and D. Xu, “Egowam: World action
+[55] J. Jeong, S. J. Joo, J. Kang, D. Kim, Y. Kim, H. Kim, and S. J. Kim,           models beyond pixels with in-the-wild egocentric human data,” 2026.
+     “Huro: Robotizing human videos for scalable VLA pretraining,” 2026.            [Online]. Available: https://arxiv.org/abs/2607.08436
+     [Online]. Available: https://arxiv.org/abs/2609.10706
+[56] J. P. Araujo, Y. Ze, P. Xu, J. Wu, and C. K. Liu, “Retargeting
+     matters: General motion retargeting for humanoid motion tracking,”
+     2025. [Online]. Available: https://arxiv.org/abs/2510.02252
+[57] Z. Chen, C. Kong, C. Zhang, Y. Yang, L. Y. Zhu, S. Kousik,
+     and D. Xu, “Warp: Whole-body retargeting for learning from
+     offline human demonstrations,” 2026. [Online]. Available: https:
+     //arxiv.org/abs/2606.29940
+[58] X. Lin, R. Yang, S. Lian, Z. Shen, B. Yu, C. Wu, H. Liu, Y. Zhang,
+     H. Li, Q. Su et al., “Human-as-humanoid: Enabling zero-shot humanoid
+     learning from ego-exo human videos with human-aligned embodiments,”
+     2026. [Online]. Available: https://arxiv.org/abs/2606.32009
+[59] C. Xia and C. Ye, “Morphology-aware human motion retargeting
+     for wheeled-humanoid loco-manipulation,” 2026. [Online]. Available:
+     https://arxiv.org/abs/2609.11357
+[60] H. Huang, H. Dong, and H. Dong, “Mobile UMI: Cross-view diffusion
+     policy with decoupled kinematics for mobile manipulation,” 2026.
+     [Online]. Available: https://arxiv.org/abs/2605.20894
+[61] K. Grauman, A. Westbury, L. Torresani, K. Kitani, J. Malik
+     et al., “Ego-exo4d: Understanding skilled human activity from
+     first- and third-person perspectives,” 2023. [Online]. Available:
+     https://arxiv.org/abs/2311.18259
+[62] L. Ma, Y. Ye, F. Hong, V. Guzov, Y. Jiang, R. Postyeni, L. Pesqueira,
+     A. Gamino et al., “Nymeria: A massive collection of multimodal
+     egocentric daily motion in the wild,” 2024. [Online]. Available:
+     https://arxiv.org/abs/2406.09905
+[63] P. Banerjee, S. Shkodrani, P. Moulon, S. Hampali, S. Han, F. Zhang,
+     L. Zhang, J. Fountain et al., “HOT3D: Hand and object tracking
+     in 3D from egocentric multi-view videos,” 2024. [Online]. Available:
+     https://arxiv.org/abs/2411.19167
+                                                                                                                                    13
+
+
+
+                       A PPENDIX                                    The full policy-example laws are consequently
+  T HEORETICAL A NALYSIS OF S TRUCTURE -P RESERVING
+                                                                                         Z
+            H UMAN - TO -ROBOT A LIGNMENT                                      QcR (B) = WK (B | τ ) dPcR (τ ),
+                                                                                         Z
+A. Scope and Corrected Problem Formulation                                        c
+                                                                               QH (B) = WK (B | Rc (τ )) dPcH (τ ).
+                                                                                e                                                 (6)
+   This appendix provides a theoretical interpretation of the
+explicit alignment pipeline in Sec. III-B. The central object       This convention weights episodes equally and then samples a
+is a task-conditioned trajectory transformation, rather than        valid start uniformly; another training sampler simply induces
+a pointwise map between two pre-existing action spaces.             a different, explicitly specified kernel.
+This distinction matters because the raw human recording               For the analysis, fix a common reference probability mea-
+contains an egocentric image and a whole-body state ht , not a      sure νc on latent task progress s ∈ [0, 1]. Let Vνc (· | τ ) draw
+robot-semantic action. Moreover, relative actions require two       s ∼ νc and return the phase-tagged pair (s, aτ (s)), where
+adjacent poses and temporal resampling requires the complete        aτ (s) is the one-step action obtained from the interpolated
+episode.                                                            policy-interface trajectory. Define
+                                                                                             Z
+   1) Trajectory distributions: For a task condition c, which                      c
+                                                                                 QR (B) = Vνc (B | τ ) dPcR (τ ),
+includes task identity and its language instruction, let                                     Z
+                                                                                 c
+                                  Nh −1
+            τ H = ℓ, {(IHi , hi )}i=0     ∼ PcH ,          (1)                   QH (B) = Vνc (B | Rc (τ )) dPcH (τ ).             (7)
+                                           
+                                   R Nr −1
+             τ R = ℓ, {(IR    R
+                         k , pk , ak )}k=0    ∼ PcR ,      (2)      These laws live on [0, 1] × A1 and hence admit regular
+                                                                                                                                c,a
+                                                                    conditional action laws given s. Their untagged marginals QR
+Each one-step robot action is a synchronized tuple                        c,a
+                                                                    and QH are population analogues of the fully aligned one-step
+        ak ∈ A1 = Abase × Atorso × Alarm × Ararm                    whole-body vectors assessed in Figs. 5 and 6; an absolute, pre-
+                  × Ahead × Alhand × Arhand .                (3)    semantic law would be defined by applying the same sampling
+The windowed policy target Ak = (ak , . . . , ak+K−1 ) there-       kernel before the last two alignment stages. Both are distinct
+fore belongs to the chunk space A = AK                              from the chunk variable A used by the policy.
+                                         1 . This makes explicit
+that the symbol A used for the policy output in Sec. II denotes        2) Structure-preserving      admissible      class:     The
+a chunk space, whereas the distribution diagnostics below           transformation-specific restrictions define an admissible
+operate on A1 . Thus, the human and robot distributions in          class RcSP :
+(1)–(2) do not initially share an action sample space.              • Continuous-valued motion: every output coordinate re-
+   DexRoam constructs a task-dependent map                            mains in the continuous one-step space A1 and no finite
+   Rc : TcH −→ TcPI ,       Rc = Rctemp ◦ Rsem ◦ Remb ,      (4)      motion vocabulary or quantizer is introduced.
+                                                                    • Order-preserving time: one common, increasing progress
+where TcPI is the common policy-interface trajectory space.           coordinate is used for the entire episode.
+Membership means that image, proprioceptive, and action             • Synchronized whole-body coupling: all components in (3)
+tensors have the robot policy’s format and action semantics;          are sampled at the same progress value, placed in one joint
+it does not imply that a human RGB stream lies on the                 action vector, and packed into the same chunk.
+support of robot-camera observations or that the entire aligned
+sample is a rollout of robot dynamics. The factors in (4)           Prediction by one unified policy, with no phase-specific
+address embodiment, action semantics, and temporal scale,           switching at deployment, is the associated policy-architecture
+respectively. Formally, Rsem constructs a relative-action field     requirement; it is not a property of the preprocessing map
+indexed by progress and step size, and Rctemp evaluates that        Rc itself. These requirements preserve robot-relevant motion
+field on the interpolated normalized-coordinate grid. This is       structure, rather than all raw human degrees of freedom:
+an analytical interpretation of the composite, equivalent to        planar root projection, two-axis head control, and morphology-
+resampling the continuous pose targets and then forming             dependent hand retargeting intentionally quotient out motion
+finite differences. If an implementation instead interpolates       that the target embodiment cannot execute.
+already discretized actions, its deviation from this ideal field       A useful analytical design criterion is therefore
+                                                                                         h      c               c
+                                                                                                                          i
+is included in the interpolation residual of Theorem 1.                   minc     Es∼νc DA1 QH (a | s, c), QR (a | s, c) , (8)
+                                                                          Rc ∈RSP
+   For a trajectory τ with N (τ ) ≥ K, let KK (τ ) =
+{0, . . . , N (τ )−K} be its valid window starts and WK,k (τ ) =        subject to   range(Rc ) ⊆ TcPI ,   εkin (Rc ) ≤ ε̄kin .
+zk = (Ik , Pk , ℓ, Ak ). Here Pk = HP (p0:k ) for a fixed deter-    Here εkin measures retargeting/IK residual on the geometric
+ministic history constructor HP , including the same bound-         channels and is infinite if no feasible target-embodiment
+ary/padding convention in both domains; Rc supplies the             solution exists; ε̄kin is a prescribed feasibility tolerance, and
+robot-format proprioceptive sequence used by this constructor       DA1 is any chosen discrepancy between probability laws on
+for aligned human data. Because one trajectory induces several      the normalized one-step action space. The conditional laws
+windows, the relevant object is the Markov kernel                   are those induced by (7), and νc fixes how task progress is
+                         1        X
+                                                                    weighted. Equation (8) is a constrained design desideratum,
+     WK (B | τ ) =                     1{WK,k (τ ) ∈ B}.      (5)
+                     |KK (τ )|                                      not an additional objective optimized by DexRoam. The
+                             k∈KK (τ )
+                                                                                                                                       14
+
+
+
+method constructs one explicit member of RcSP ; MMD, SWD,               1) Root-frame gauge invariance: Proposition 2 (Invari-
+and PCA are post-hoc diagnostics. Conditioning on progress           ance to the world planar gauge). Let G ∈ SE(3) be a
+also makes the intended semantics explicit. Matching only the        fixed rigid transformation that preserves gravity and the ground
+unordered action marginal is not sufficient, as shown next.          plane; equivalently, its rotation obeys RG zH = zH and its
+                                                                     translation lies in the ground plane. Suppose
+
+B. Why Distribution-Only Alignment Is Insufficient                                       ΠG W fpelvis,t 2 ≥ η > 0                   (13)
+                                                                     so that the projected pelvis-forward direction is well-defined.
+Proposition 1 (Marginal matching is non-identifying). Let
+                                                                     If all human world poses are changed by W T′J,t = G W TJ,t ,
+a = (a0 , . . . , aN −1 ) be any whole-body action trajectory and
+                                                                     then
+                                 N −1
+                              1 X                                                          W
+                                                                                               T′H,t = G W TH,t ,                   (14)
+                       µa =        δa                         (9)
+                              N t=0 t                                                          ′
+                                                                                           H
+                                                                                             T′J,t = H TJ,t ,                       (15)
+its unordered empirical action distribution. For every permu-                                    ′
+                                                                                            ∆TH
+                                                                                              t = ∆Tt .
+                                                                                                        H
+                                                                                                                                    (16)
+tation σ of {0, . . . , N − 1}, µa◦σ = µa . Consequently, any
+discrepancy computed solely on one-step action marginals             Thus the root-relative upper-body poses and the local chassis
+assigns zero distance to the original and permuted sequences,        increments are independent of global ground-plane origin and
+although their temporal transitions and task-stage order can be      yaw.
+different.                                                                Proof: Because G preserves gravity, ΠG RG = RG ΠG .
+     Proof: Reindexing a finite sum does not change the              Hence both the projected pelvis origin and projected forward
+measure:                                                             axis transform by G, while normalization is valid by (13).
+                    1 X             1 X                              This proves (14). Direct substitution gives
+                           δaσ(t) =       δaj .            (10)
+                   N t              N j                                         H′ ′
+                                                                                                      −1 W
+                                                                                  TJ,t = G W TH,t         G TJ,t
+Thus every distribution discrepancy that depends only on this                               W
+                                                                                                   −1 W
+                                                                                        =     TH,t        TJ,t = H TJ,t ,     (17)
+measure is unchanged. Choosing a nonmonotone permutation
+can alter adjacency relations (at , at+1 ), so equality of action    and the same cancellation in two consecutive root frames
+marginals cannot identify temporal structure. If each body           proves (16).
+component is permuted independently, its component marginal             Absolute world poses do not have this invariance. Proposi-
+is also unchanged while synchronous cross-component pairing          tion 2 formalizes why the pelvis-centric construction removes
+is destroyed. A discrepancy on the joint whole-body vector,          a scene-coordinate nuisance before human and robot supervi-
+as used in the paper, can detect same-step coupling but still        sion are mixed.
+cannot detect episode order.                                            2) Relative action semantics: Proposition 3 (Complete-
+   The same limitation can coexist with arbitrarily accurate         ness modulo a constant gauge). Let G be any matrix Lie
+Wasserstein matching and explicit quantization. On a compact         group and let X0:N = (X0 , . . . , XN ) ∈ GN +1 . The anchored
+action set, let qϵ map every action to its nearest point in a        relative encoding
+finite ϵ-net. Coupling a with qϵ (a) gives                                                        N −1
+                                                                                                               ∆Xt = X−1
+                                                                                                        
+                                                                        Ψ(X0:N ) = X0 , {∆Xt }t=0         ,              t Xt+1 ,
+                      Wp (P, (qϵ )# P ) ≤ ϵ                  (11)                                                               (18)
+                                                                     is bijective. If the anchor X0 is omitted, the increments deter-
+for every p ≥ 1, even though qϵ is finite-valued and noninjec-
+                                                                     mine the trajectory exactly up to a common left multiplication.
+tive. Hence a small distribution distance alone does not certify
+continuous, ordered, or fine-grained motion. This is why                   Proof: Given the encoding, recursively set
+(8) restricts the alignment map before assessing distribution                                Xt+1 = Xt ∆Xt .                        (19)
+compatibility.
+                                                                     This reconstructs one and only one anchored trajectory, prov-
+                                                                     ing bijectivity. For any constant C ∈ G,
+C. Structural Properties of the DexRoam Map                                         (CXt )−1 (CXt+1 ) = X−1
+                                                                                                         t Xt+1 ,                   (20)
+   We now state the properties supplied by the three explicit        so unanchored increments are unchanged along a common left
+alignment stages. Let the continuous robot-compatible pose           orbit. Conversely, two sequences with the same increments
+curve produced by embodiment retargeting be                          differ only through their initial left factor, by recursion in (19).
+q(s) = Xb (s), Xc (s), Xl (s), Xr (s), uh (s), ulh (s), urh (s) ,
+                                                                
+
+                                                              (12)      Proposition 3 applies componentwise to the product group
+where s ∈ [0, 1] denotes task progress, Xb ∈ SE(2) is the            SE(2) × SE(3)3 in (12). If each current product pose Xt
+root/chassis pose, Xc , Xl , Xr ∈ SE(3) are the chest and two        is deterministically recoverable from proprioception by the
+wrist targets, and the u terms collect the direct head and hand      known forward kinematics and root convention, and the con-
+joint targets. Mechanical feasibility and retargeting fidelity are   troller uses the same right-side composition Xt+1 = Xt ∆Xt ,
+properties of Remb ; the results below do not assume that the        each relative action uniquely specifies the next geometric
+non-executable part of the human motion can be preserved.            target. The action-semantic stage therefore does not quantize
+                                                                                                                                    15
+
+
+
+or replace the fine-grained sequence with a motion primitive;            Proof: Strict monotonicity preserves order and endpoints.
+it removes a constant coordinate/initial-configuration gauge.       Surjectivity gives
+More specifically, under the nuisance model                                 Γij (γ ◦ ϕ) = {(γi (ϕ(t)), γj (ϕ(t))) : t ∈ [0, 1]}
+                Xdt = Cd Zt ,        d ∈ {H, R},            (21)                        = Γij (γ).                                (25)
+the human and robot relative motions both equal Z−1t Zt+1           The same argument applied to the full tuple proves equality
+even when CH ̸= CR . This exact statement covers constant           of the oriented joint path.
+left nuisances. Nonlinear morphology effects, IK error, and            Proposition 5 concerns the ideal continuous reparameter-
+discarded head roll remain part of embodiment-retargeting           ization. DexRoam evaluates every component on the same
+error and are not removed by (20) alone.                            finite normalized-coordinate grid rk = (k − 1)/(N̄r − 1).
+   3) Continuity: Proposition 4 (Continuous-valued aligned          The retained samples preserve index order, endpoints, and
+motion). Assume that (13) holds, the retargeted targets in (12)     synchronization at every retained coordinate, and they do not
+are continuous, the implemented rotation parameterization and       introduce component-specific time warps. A finite sample set
+SLERP branch are continuous on each interpolation segment,          does not, however, equal the full path or preserve an event
+and base yaw is unwrapped. Then the geometric aligned               that falls strictly between samples. If γ is Lγ -Lipschitz in a
+actions are samples of a piecewise-continuous curve in A1 .         product metric and the largest grid gap is ∆r , every point on
+In particular, the listed geometric operators introduce no finite   the continuous path is within Lγ ∆r /2 of a retained waypoint.
+action quantizer.                                                   This guarantee does not recover information discarded by a
+      Proof: Under the stated regularity condition, ground pro-     noninjective retargeting map.
+jection and vector normalization are continuous. Group inver-
+sion and multiplication are smooth. The retargeted target curve
+                                                                    D. Alignment Error and Distribution Discrepancy
+is continuous by assumption, linear position interpolation is
+continuous, and the selected SLERP and rotation-coordinate            We next quantify the role of temporal resampling. Let
+branches are continuous by assumption. Their composition            Xd (s) ∈ SE(2) × SE(3)3 denote the geometric part of (12),
+with the relative encoding is therefore continuous on each          and let ud (s) collect the direct joint targets. For d ∈ {H, R}
+interpolation interval. Concatenating all body components           and 0 ≤ s < s + h ≤ 1, define
+does not change continuity.
+                                                                          bd (s, h) = χ Xd (s)−1 Xd (s + h), ud (s + h)
+                                                                                                                          
+                                                                                                                               (26)
+   This statement concerns geometric actions. Images and
+episode-state signals are matched by nearest neighbor in            as the vectorized hybrid whole-body robot action at progress s
+the implementation and are not claimed to be continuous.            with progress increment h. Here χ parameterizes the geometric
+Likewise, the absence of deployment phase switching follows         relative transforms and concatenates the direct head and hand
+from the unified-policy interface, not from Proposition 4. If       targets at the next waypoint; the inverse and product are taken
+the underlying position curve is twice differentiable and the       componentwise on the product group.
+largest human progress gap is ∆h , linear interpolation has the       1) Regularity assumptions: The demonstrations need not
+standard error bound                                                be observed in pairs. For analysis only, assume there exists a
+                                 ∆2                                 coupling π over same-task latent instances, human and robot
+               p(s) − p(s)∥2 ≤ h sup ∥p′′ (s)∥2 ,
+          sup ∥b                                           (22)     episodes, and valid normalized-coordinate starts (rH , rR ). Let
+            s                      8 s
+                                                                    ψd : [0, 1] → [0, 1] be a continuous, strictly increasing phase
+with an analogous O(∆2h ) local bound inside a geodesically         map with ψd (0) = 0 and ψd (1) = 1, mapping normalized
+convex neighborhood when the rotation curve is twice co-            episode coordinate to latent task progress, and write
+variantly differentiable with bounded covariant acceleration.
+For merely continuous motion, the interpolation error instead                      ∆ψd (r; h) = ψd (r + h) − ψd (r).              (27)
+vanishes according to its modulus of continuity as ∆h → 0.          The following assumptions isolate the discrepancies addressed
+  4) Temporal order and synchronized coupling: Proposition          by DexRoam.
+5 (Common progress preserves synchronization). Let                  •   Progress-proxy residuals. Under π, compared starts and
+         γ(s) = (γ1 (s), . . . , γm (s)) ,   s ∈ [0, 1],    (23)        increments obey
+                                                                                                  |ψH (rH ) − ψR (rR )| ≤ δ0 ,    (28)
+be the joint whole-body curve, and let ϕ : [0, 1] → [0, 1] be a
+strictly increasing continuous bijection. Then:                            ∆ψH (rH ; h) − ∆ψR (rR ; hR ) − (h − hR ) ≤ δh ,       (29)
+
+1) γ and γ ◦ ϕ have identical endpoints and the same oriented         for h ∈ {hH , h̄R } at starts for which all displayed incre-
+   path;                                                              ments are valid. Thus δ0 and δh are direct cross-domain
+2) the order of any two events at s1 < s2 is unchanged; and           residuals, not separate per-domain errors.
+3) for any components i, j, their synchronous coupling graph        • Embodiment residual. After embodiment and semantic
+                                                                      alignment, actions at equal progress and equal progress
+              Γij (γ) = {(γi (s), γj (s)) : s ∈ [0, 1]}     (24)      increment satisfy
+   is unchanged by the common reparameterization.                                     ∥bH (s, h) − bR (s, h)∥2 ≤ εE .             (30)
+                                                                                                                                       16
+
+
+
+•   Local regularity. On the compact feasible motion set,                2) Consequences for Population SWD and MMD: Corol-
+                       ′   ′               ′             ′
+      ∥bd (s, h) − bd (s , h )∥2 ≤ Ls |s − s | + Lh |h − h |. (31)     lary 1 (Metric bounds under progress coupling). Suppress
+                                                                                   a        a
+                                                                       c and let QR and QH denote the one-step action marginals
+The first assumption is substantive. Uniform normalized time           in (7). Assume the coupling used in Theorem 1 induces a
+                                                                                            a    a
+is a valid task-progress proxy when episodes traverse the same         coupling πa ∈ Π(QR , QH ) whose root-mean-square action
+ordered behavior at different overall speeds. If their internal        cost is at most ρalign . Let S : A1 → Rm be the common
+stage speeds differ arbitrarily, δ0 or δh can be large and length      action-normalization map and assume S is Lnorm -Lipschitz.
+                                                                                a           a
+matching alone cannot guarantee semantic phase alignment.              Write Qd,S = S# Qd . Then the population order-two sliced
+For example, if each domain’s phase estimate has pointwise             Wasserstein distance satisfies
+error at most δ and the same normalized start is compared, one                     a      a               a     a
+                                                                         SWD2 (QR,S , QH,S ) ≤ W2 (QR,S , QH,S ) ≤ Lnorm ρalign .
+generally obtains only δ0 ≤ 2δ and δh ≤ 4δ; the definitions                                                                   (38)
+above avoid silently dropping these cross-domain factors.              For the Gaussian kernel
+Theorem 1 (Temporal-alignment error bound). Let                                                     
+                                                                                                       ∥x − y∥22
+                                                                                                                 
+              1                   1                   1                              kσ (x, y) = exp −             ,          (39)
+   hH =            ,     hR =          ,     h̄R =         .                                             2σ 2
+           Nh − 1               Nr − 1             N̄r − 1
+                                                          (32)         the unsquared maximum mean discrepancy also obeys
+Here N̄r is the task-specific reference length chosen by                                   a     a       Lnorm ρalign
+                                                                                  MMDkσ (QR,S , QH,S ) ≤              .             (40)
+DexRoam (derived from the empirical mean robot length), so                                                   σ
+h̄R is a fixed reference step and need not equal E[hR ]. Under             Proof: Pushing πa through (S, S) gives a valid coupling
+π, set                                                                 whose root-mean-square cost is at most Lnorm ρalign . The
+                aR = bR (ψR (rR ), ∆ψR (rR ; hR )) ,                   Wasserstein distance is the infimum over all such couplings.
+              apre                                                     Every one-dimensional projection is 1-Lipschitz, which yields
+                H = bH (ψH (rH ), ∆ψH (rH ; hH )) ,
+              ideal
+                                                                      SWD2 ≤ W2 . If φσ is the Gaussian-kernel feature map, then
+             aH = bH ψH (rH ), ∆ψH (rH ; h̄R ) ,                (33)                                               2    2
+                                                                                                                           
+                                                                              ∥φσ (x) − φσ (y)∥2H = 2 1 − e−∥x−y∥2 /(2σ )
+and assume the implemented interpolant obeys ∥aalign   H    −
+aideal ∥  ≤   ε     . The superscript “pre” denotes  a  robot-                                          ∥x − y∥22
+  H     2       int                                                                                 ≤              .                 (41)
+semantic relative action before the temporal stage; it is not                                               σ2
+the absolute “Raw distribution” plotted in Figs. 5–6. Define           Taking expectations under a coupling and then the infimum
+                           1/2                                       gives MMDkσ ≤ W1 /σ ≤ W2 /σ, which proves the stated
+     ρj = Eπ ∥ajH − aR ∥22       , j ∈ {pre, align}.      (34)         normalized-coordinate bound.
+Then                                                                      Corollary 1 isolates the contribution of temporal alignment
+                                                       1/2            after fixing the hybrid action semantics; Propositions 2–3 ex-
+     ρpre ≤ εE + Ls δ0 + Lh δh + Lh Eπ |hH − hR |2            , (35)   plain why the embodiment and semantic stages remove partic-
+    ρalign ≤ εE + Ls δ0 + Lh δh + εint                                 ular nuisance coordinates. Together they provide a mechanism
+             + Lh Eπ |h̄R − hR |2
+                                  1/2
+                                       .                        (36)   consistent with, but not a proof of, the total empirical reduction
+                                                                       in Fig. 6. The displayed bounds concern population SWD2
+     Proof: Write sd = ψd (rd ) and b
+                                    hd = ∆ψd (rd ; hd ). Insert        with unit-direction averaging and unsquared Gaussian MMD
+the robot-domain action at (sH , b
+                                 hH ). The triangle inequality,        under a common normalization. Finite-sample estimators add
+(30), and (31) give                                                    sampling error; MMD squared, another kernel or bandwidth
+                                                                       rule, or another SWD aggregation changes the reported form
+  ∥apre − aR ∥2 ≤ εE + Ls |sH − sR | + Lh |b
+       H                                     hH − bhR |                or constants. Consequently, the exact normalization, estimator,
+                   ≤ εE + Ls δ0 + Lh δh + Lh |hH − hR |. (37)          projection, and PCA protocol must be stated from the experi-
+                                                                       ment implementation rather than inferred from this theory.
+Minkowski’s inequality under π proves (35). After resampling,
+use h = h̄R in (29) and add the interpolation residual; the same
+argument proves (36).                                                  E. Why Aligned Human Data Can Improve Robot Learning
+   The temporal stage therefore replaces the variable human
+normalized-coordinate step hH by the fixed reference step h̄R ;           The previous results concern the action marginal. Policy
+the remaining rate term is the variation of robot episode steps        learning instead depends on the full robot-native example z =
+around that reference. The bound becomes smaller when that             (I, P, ℓ, A). We now give a target-risk bound on this full space.
+variation and interpolation error are smaller than the original        For readability, suppress c and write QH for the aligned human
+                                                                       policy-example law Q  e c and QR for the robot law. Define the
+cross-domain rate mismatch. This is a conditional statement                                    H
+about the controlled error terms, not a claim that every finite-       cotraining mixture
+sample discrepancy must decrease. For a K-step chunk with                       Qα = (1 − α)QR + αQH ,              0 ≤ α ≤ 1,      (42)
+the ordinary stacked Euclidean
+                            √      norm, the right-hand sides
+increase by at most a factor K; with the mean per-step chunk           and, for supervised loss gθ (z),
+metric, they are unchanged.                                                                RD (θ) = Ez∼D [gθ (z)].                  (43)
+                                                                                                                                       17
+
+
+
+The loss-class discrepancy is                                       depends on representation transfer and optimization and is not
+          dL (QR , QH ) = sup |RQR (θ) − RQH (θ)| .         (44)    claimed by this bound.
+                              θ∈Θ                                      The uniform-convergence term in Theorem 2 is an explicit
+                                                                    assumption, not a claim that overlapping windows are inde-
+Theorem 2 (Robot-domain risk of mixture training). Let θb
+                                                                    pendent. Here N must be interpreted as an episode-level or
+be an εopt -approximate empirical-risk minimizer on samples
+                                                                    otherwise justified effective sample size; a concrete bound
+from Qα . Suppose that, on an event of probability at least
+                                                                    for correlated windows requires an appropriate dependent-data
+1 − δ,
+                                                                    generalization result.
+               sup RQ (θ) − R
+                          α
+                              b Q (θ) ≤ εN .
+                                        α              (45)
+                θ∈Θ
+    ⋆                                                               F. Closed-Loop Error Accumulation
+If θR ∈ arg minθ∈Θ RQR (θ), then, on the same event,
+                 b ≤ RQ (θ⋆ ) + 2εN                                    The action-semantic ablation in Sec. IV-E shows that mis-
+           RQ (θ)                   R
+                 R            R
+                                                                    matched target semantics can be destructive during rollout. A
+                          + 2αdL (QR , QH ) + εopt .        (46)    standard conditional stability calculation makes one possible
+                                                                    accumulation mechanism explicit.
+     Proof: By linearity of (42),
+                                                                    Corollary 2 (Propagation of action error). Suppose the
+           |RQR (θ) − RQα (θ)| ≤ αdL (QR , QH ).            (47)    closed-loop transition map satisfies
+Applying (47), the uniform bound, and approximate empirical           dx (F (x, a), F (x′ , a′ )) ≤ Lx dx (x, x′ ) + La ∥a − a′ ∥2 . (52)
+optimality in sequence gives
+                                                                    Let et = dx (xt , x⋆t ) and let ηt = ∥at −a⋆t ∥2 . If both sequences
+        RQ (θ) b ≤ RQ (θ) b + αdL                                   follow xt+1 = F (xt , at ) and x⋆t+1 = F (x⋆t , a⋆t ), and x0 = x⋆0 ,
+            R             α
+
+                     ≤R
+                      b Q (θ)
+                         α
+                           b + εN + αdL                             then
+                                                                                                    T −1
+                      b Q (θ⋆ ) + εN + αdL + εopt
+                                                                                                     X
+                     ≤R   α   R                                                           eT ≤ La        LTx −1−t ηt .              (53)
+                             ⋆
+                     ≤ RQα (θR ) + 2εN + αdL + εopt                                                t=0
+                             ⋆
+                     ≤ RQR (θR ) + 2εN + 2αdL + εopt ,      (48)         Proof: Equation (52) gives et+1 ≤ Lx et +La ηt . Repeated
+                                                                    substitution with e0 = 0 yields (53).
+where the arguments of dL are omitted only for compactness.            Thus persistent absolute-pose or phase-inconsistent super-
+                                                                    vision can accumulate over a long horizon, especially when
+   The discrepancy in (46) can be controlled by familiar            Lx ≥ 1. Root-relative semantics and progress alignment are
+distribution metrics under standard regularity assumptions. If      designed to reduce identifiable sources of ηt , but (53) is a
+every gθ belongs to an RKHS Hk with ∥gθ ∥Hk ≤ B, then               conditional stability bound; it does not by itself prove that
+            dL (QR , QH ) ≤ B MMDk (QR , QH ).              (49)    either representation produces a particular action error or
+                                                                    guarantee task success. Equation (53) is written at the low-
+If every loss is instead Lg -Lipschitz under the metric on policy   level action step; the same proof applies to chunk execution
+examples, the Kantorovich–Rubinstein duality gives                  after replacing F by the induced K-step transition and at by
+                dL (QR , QH ) ≤ Lg W1 (QR , QH ).           (50)    At .
+These are statements about the full joint policy-example
+                                                                    G. Interpretation and Limits of the Guarantees
+distributions, not only their action marginals. The action
+MMD/SWD in the experiments diagnoses one marginal aspect               The exact results are the non-identifiability of marginal
+of the gap; it does not upper-bound the joint discrepancy.          matching, planar gauge invariance, completeness of anchored
+Visual appearance, proprioception, and execution dynamics           relative actions, and preservation of order and synchronous
+can leave a residual domain discrepancy.                            pairing under a common monotone progress map. Under the
+   For comparison, a robot-only estimator has the analogous         stated shared-progress and regularity assumptions, temporal
+excess-risk bound 2εNR + εR                                         resampling also replaces the human step-size mismatch by
+                             opt . Ignoring differences in opti-
+mization error, the mixture guarantee is tighter whenever           a fixed robot-reference-rate term in an action-error bound,
+                                                                    which upper-bounds population SWD/MMD under the stated
+                  εN + αdL (QR , QH ) < εNR .               (51)    coupling; the mixture-risk result then quantifies when extra
+Equation (51) exposes the relevant trade-off: additional human      aligned samples can improve a robot-domain guarantee.
+trajectories can reduce the estimation term εN , while align-          These guarantees are deliberately conditional. The normal-
+ment is designed to reduce part of the domain-bias term. The        ized episode index is only a proxy for semantic progress,
+guarantee improves only to the extent that it reduces the full      with cross-domain residuals δ0 and δh , and only robot-relevant
+dL (QR , QH ). It also explains why aligned human data need         structure modulo embodiment constraints is preserved. The
+not replace robot data: with α = 1, residual observation and        analysis proves neither global optimality of Rc , strict re-
+dynamics gaps can still make the bound loose. Theorem 2             duction of every empirical distance, nor higher task success.
+directly describes cotraining and the final cotraining phase        Executability, distribution-gap reduction, and policy improve-
+of Human Pretrain + Cotrain FT. The effect of human-                ment remain the empirical validation of the favorable regime
+only pretraining followed by robot-only finetuning additionally     characterized above.
+
