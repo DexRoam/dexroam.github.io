@@ -19,7 +19,9 @@
   --chart-text: #243852;
   --chart-muted: #718097;
   --chart-marker-outline: #ffffff;
-  --shell: min(1280px, calc(100vw - 64px));
+  --shell-max: 1000px;
+  --media-shell-max: 1440px;
+  --shell: min(var(--shell-max), calc(100vw - 64px));
   --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --sans: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
   --hero-rounded: Fredoka, "Arial Rounded MT Bold", Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -1451,7 +1453,7 @@ body { color: #162338; }
   line-height: 1.65;
 }
 .policy-results-panel {
-  padding: 30px;
+  padding: 18px 22px;
   border: 1px solid var(--line-light);
   border-radius: 18px;
   background: #fff;
@@ -1460,14 +1462,14 @@ body { color: #162338; }
 .policy-results-controls {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  max-width: 760px;
-  margin: 0 auto 34px;
+  gap: 10px;
+  max-width: 540px;
+  margin: 0 auto 16px;
 }
 .policy-results-controls label { min-width: 0; }
 .policy-results-controls label > span {
   display: block;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   color: var(--gray);
   font-family: var(--mono);
   font-size: 9px;
@@ -1477,17 +1479,17 @@ body { color: #162338; }
 }
 .policy-results-controls select {
   width: 100%;
-  min-height: 48px;
+  min-height: 40px;
   padding: 0 42px 0 15px;
   border: 1px solid var(--line-light);
   border-radius: 10px;
   color: #162338;
   background-color: #f7f9fe;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
-.policy-chart-heading { margin-bottom: 18px; text-align: center; }
+.policy-chart-heading { margin-bottom: 8px; text-align: center; }
 .policy-chart-heading h3 { margin: 0; font-size: clamp(18px, 2vw, 28px); letter-spacing: -.03em; }
 .policy-chart-heading p { margin: 6px 0 0; color: var(--gray); font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
 .policy-results-legend {
@@ -1495,7 +1497,7 @@ body { color: #162338; }
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px 18px;
-  margin-bottom: 22px;
+  margin-bottom: 12px;
 }
 .policy-results-legend span { display: inline-flex; align-items: center; gap: 7px; color: #45546c; font-size: 11px; }
 .policy-results-legend i { width: 18px; height: 12px; border: 0; background: var(--legend-color); }
@@ -1593,9 +1595,9 @@ body { color: #162338; }
   .policy-results-heading { margin-bottom: 26px; }
   .policy-results-heading h2 { font-size: clamp(25px, 6.4vw, 36px); }
   .policy-results-heading > p:last-child br { display: none; }
-  .policy-results-panel { padding: 20px 14px; border-radius: 14px; }
-  .policy-results-controls { gap: 8px; margin-bottom: 28px; }
-  .policy-results-controls select { min-height: 44px; padding-left: 10px; font-size: 12px; }
+  .policy-results-panel { padding: 16px 12px; border-radius: 14px; }
+  .policy-results-controls { gap: 8px; margin-bottom: 14px; }
+  .policy-results-controls select { min-height: 40px; padding-left: 10px; font-size: 12px; }
   .policy-results-legend { justify-content: flex-start; }
 }
 
@@ -1986,13 +1988,18 @@ body { color: #162338; }
 .side-toc { display: none; }
 
 @media (min-width: 1180px) {
-  :root { --shell: 70vw; }
+  :root { --shell: min(70vw, var(--shell-max)); }
 
   .shell,
-  .demo-video-shell,
   .capture-system-shell {
-    width: 70vw;
-    max-width: none;
+    width: var(--shell);
+    max-width: var(--shell-max);
+    margin-inline: auto;
+  }
+
+  .demo-video-shell {
+    width: min(70vw, var(--media-shell-max));
+    max-width: var(--media-shell-max);
     margin-inline: auto;
   }
 
@@ -2012,7 +2019,7 @@ body { color: #162338; }
     position: fixed;
     z-index: 80;
     top: 50%;
-    left: clamp(18px, 3vw, 58px);
+    left: max(24px, calc(50vw - 850px));
     width: min(10vw, 190px);
     display: block;
     color: #162338;
@@ -2076,6 +2083,21 @@ body { color: #162338; }
   .side-toc a.is-active::before { height: 18px; }
 }
 
+/* Ultrawide displays need a reading-width cap rather than a viewport-only width. */
+@media (min-width: 1800px) and (min-aspect-ratio: 2 / 1) {
+  :root {
+    --shell-max: 960px;
+    --media-shell-max: 1120px;
+  }
+
+  .demo-video-shell .highlight-statement {
+    max-width: var(--shell-max);
+    margin-inline: auto;
+  }
+
+  .side-toc { left: max(24px, calc(50vw - 780px)); }
+}
+
 /* Let the white page field flow continuously between major sections. */
 #main-content > section { border-block: 0 !important; }
 #main-content > .research-marquee { border-block: 0 !important; }
@@ -2084,10 +2106,10 @@ body { color: #162338; }
 .site-footer { border-top: 0; }
 
 /* One compact vertical rhythm for every research section below the cover. */
-#main-content > section:not(.hero):not(.proof-band) { padding-block: 48px !important; }
+#main-content > section:not(.hero):not(.proof-band) { padding-block: 32px !important; }
 
 @media (max-width: 760px) {
-  #main-content > section:not(.hero):not(.proof-band) { padding-block: 36px !important; }
+  #main-content > section:not(.hero):not(.proof-band) { padding-block: 24px !important; }
 }
 
 /* Section titles stand on their own; remove the former eyebrow labels. */
