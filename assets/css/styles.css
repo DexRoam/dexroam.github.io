@@ -19,7 +19,7 @@
   --chart-text: #243852;
   --chart-muted: #718097;
   --chart-marker-outline: #ffffff;
-  --shell-max: 1000px;
+  --shell-max: 1280px;
   --media-shell-max: 1440px;
   --shell: min(var(--shell-max), calc(100vw - 64px));
   --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
