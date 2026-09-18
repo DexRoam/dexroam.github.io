@@ -107,9 +107,8 @@
 
     <section class="demo-video-section" id="highlights" aria-labelledby="highlights-title">
       <div class="shell demo-video-shell reveal">
-        <p class="highlight-kicker" id="highlights-title">Research highlights</p>
-
         <div class="highlight-statement">
+          <h2 class="highlight-title" id="highlights-title">Research <em>Highlight</em></h2>
           <p>Mobile bimanual dexterous manipulation requires continuous coordination of locomotion, whole-body motion, and finger-level dexterity, creating a severe robot demonstration bottleneck. <strong>DexRoam</strong> is a complete system for learning such behaviors from egocentric whole-body human demonstrations. To preserve the fine-grained structure of human motion, we perform three explicit alignment stages — <strong>embodiment</strong>, <strong>action-semantic</strong>, and <strong>temporal</strong> — transforming human motion into continuous, coupled robot-compatible action supervision for standard VLA policies. To make collection scalable, DexRoam further provides a <span class="highlight-underline">tracker-free capture system</span> using only a consumer VR headset and a head-mounted stereo camera, without external cameras or motion trackers.</p>
           <p>Across five real-world tasks and two VLA backbones, aligned human demonstrations raise average success from <strong>29% to 56%</strong> on GR00T N1.7 and from <strong>32% to 57%</strong> on &pi;<sub>0.5</sub>, while matching robot-only training with <span class="highlight-underline">50% fewer robot demonstrations</span>.</p>
         </div>
@@ -300,6 +299,7 @@
         <div class="capture-system-heading reveal">
           <p class="eyebrow">Real-world deployment</p>
           <h2 id="deployment-title">Real-world mobile<br><em>manipulation deployment</em></h2>
+          <p class="deployment-intro">Real-robot evaluation across diverse mobile manipulation tasks.</p>
         </div>
 
         <h3 class="deployment-current-title reveal" data-deployment-title>Pick Chips Can</h3>
@@ -330,8 +330,8 @@
             </video>
           </article>
 
-          <button class="deployment-nav deployment-nav-prev" type="button" data-deployment-nav="-1" aria-label="Show previous task">Previous</button>
-          <button class="deployment-nav deployment-nav-next" type="button" data-deployment-nav="1" aria-label="Show next task">Next</button>
+          <button class="deployment-nav deployment-nav-prev" type="button" data-deployment-nav="-1" aria-label="Show previous task">&larr;</button>
+          <button class="deployment-nav deployment-nav-next" type="button" data-deployment-nav="1" aria-label="Show next task">&rarr;</button>
         </div>
         <p class="deployment-status" data-deployment-status role="status" hidden></p>
       </div>
