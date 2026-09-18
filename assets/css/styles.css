@@ -1152,6 +1152,10 @@ body { background: var(--white); }
 
 .hero .hero-actions {
   margin-top: 28px;
+  flex-wrap: wrap;
+}
+.hero .hero-actions .button {
+  min-width: 104px;
 }
 
 .button-dark {
@@ -1363,7 +1367,14 @@ body { background: var(--white); }
   .hero-affiliations,
   .hero-author-note { font-size: 11px; }
   .hero-affiliations { column-gap: 12px; }
-  .hero .hero-actions { margin-top: 22px; }
+  .hero .hero-actions {
+    width: min(100%, 300px);
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .hero .hero-actions .button { width: 100%; min-width: 0; }
   .hero-orb { width: 235vw; height: 25%; filter: blur(9px); }
   .hero-followup { padding-top: 48px; }
   .hero-followup .hero-stage { width: calc(100vw - 12px); }
