@@ -1,0 +1,43 @@
+dynamic environments remain a major challenge
+for visual inertial orientation
+moving pedestrians
+vehicles and frequent occlusions
+can easily corrupt feature tracking
+and cause severe drift
+to address this problem we propose STAG-VIO
+a stabilized prompt geometry interface for robust
+dynamic VIO
+STAG-VIO consists of three stages
+track to prompt
+which stabilizes object prompts through uncertainty
+Adaptive Multi object Tracking
+prompt to mask
+which generates category agnostic
+dynamic masks with promptable segmentation
+and mask to geometry
+which filters dynamic features
+and redistributes static constraints
+for reliable VIO optimization
+this significantly improves robustness
+in highly dynamic scenes
+where naive prompt
+based segmentation often fails
+our ablation study shows that prompt
+stabilization is the most important component
+reducing trajectory error by up to 83%
+compared with seven baselines across 12 settings
+STAG VIO achieves the lowest RMSE in eight settings
+the advantage is most evident in highly dynamic scenes
+where our method ranks first
+in all three high dynamic cases
+these results further confirm the robustness of STAG-VIO
+under heavy motion and occlusion
+we further validate the system on a real mobile robot
+in complex urban traffic
+with pedestrians cars
+buses and motorcycles
+in this real world experiment
+STAG-VIO reduces RMSE by 57.9%
+while producing trajectories
+that align much more closely with the true path
+thank you for watching

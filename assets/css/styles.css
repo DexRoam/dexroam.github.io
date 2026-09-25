@@ -1389,6 +1389,7 @@ body { background: var(--white); }
     gap: 9px;
   }
   .hero .hero-actions .button { width: 100%; min-width: 0; }
+  .hero .hero-actions .button:last-child { grid-column: 1 / -1; }
   .hero-orb { width: 235vw; height: 25%; filter: blur(9px); }
   .hero-followup { padding-top: 48px; }
   .hero-followup .hero-stage { width: calc(100vw - 12px); }
