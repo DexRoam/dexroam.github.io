@@ -1303,7 +1303,9 @@ body { background: var(--white); }
   line-height: 1.65;
 }
 
-.demo-video-block { margin-top: 64px; }
+.demo-video-block {
+  margin-top: 64px;
+}
 .demo-video-frame {
   width: 100%;
   max-width: 100%;
@@ -2323,6 +2325,25 @@ html[data-theme="dark"] .side-toc-title { border-bottom-color: rgba(128, 161, 22
 html[data-theme="dark"] .side-toc a { color: #8292a9; }
 html[data-theme="dark"] .side-toc a:hover,
 html[data-theme="dark"] .side-toc a.is-active { color: #80a8ff; }
+
+/* Resource links keep the site-wide button language and add recognizable icons. */
+.resource-button {
+  gap: 8px;
+  white-space: nowrap;
+}
+.resource-button iconify-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  font-size: 18px;
+}
+.resource-button--arxiv iconify-icon { color: #b31b1b; }
+.resource-button--paper iconify-icon { color: #d23b32; }
+.resource-button--video iconify-icon,
+.resource-button--hardware iconify-icon { color: #2555bd; }
+.resource-button--github iconify-icon { color: #171a1f; }
+.resource-button--huggingface iconify-icon { color: #d8a900; }
+html[data-theme="dark"] .resource-button--github iconify-icon { color: #eef4ff; }
 
 @media (max-width: 760px) {
   html[data-theme="dark"] .nav-menu { color: #e7eefb; border-color: rgba(128, 161, 226, .22); background: rgba(8, 13, 23, .98); }
