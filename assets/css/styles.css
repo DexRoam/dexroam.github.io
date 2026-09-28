@@ -2362,7 +2362,7 @@ html[data-theme="dark"] .side-toc a.is-active { color: #80a8ff; }
 }
 .resource-button--arxiv iconify-icon { color: #b31b1b; }
 .resource-button--paper iconify-icon { color: #d23b32; }
-.resource-button--video iconify-icon,
+.resource-button--video iconify-icon { color: #ff0000; }
 .resource-button--hardware iconify-icon { color: #2555bd; }
 .resource-button--github iconify-icon { color: #171a1f; }
 .resource-button--huggingface iconify-icon { color: #d8a900; }
@@ -2446,7 +2446,7 @@ body:has(.site-header.is-scrolled) .scroll-progress { opacity: 1; }
   align-items: center;
   justify-content: flex-start;
   margin-inline: auto;
-  padding: clamp(142px, 16vh, 190px) 0 0;
+  padding: clamp(172px, 19vh, 220px) 0 0;
   border: 0;
   text-align: center;
 }
@@ -2457,7 +2457,7 @@ body:has(.site-header.is-scrolled) .scroll-progress { opacity: 1; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(30px, 4vh, 44px);
+  gap: clamp(15px, 2vh, 22px);
   margin: 0;
   transform: translateY(calc(var(--hero-progress) * -5vh));
   will-change: transform;
@@ -2616,10 +2616,10 @@ html[data-theme="dark"] .paper-intro .button-quiet {
   .hero .hero-copy {
     width: min(100% - 40px, 640px);
     align-items: center;
-    padding: clamp(128px, 17vh, 156px) 0 0;
+    padding: clamp(148px, 19vh, 176px) 0 0;
     text-align: center;
   }
-  .hero h1 { width: 100%; min-width: 0; align-items: center; gap: 24px; }
+  .hero h1 { width: 100%; min-width: 0; align-items: center; gap: 12px; }
   .hero-title-name { width: auto; font-size: clamp(58px, 19vw, 84px); }
   .hero-title-subtitle { width: 100%; max-width: 100%; margin: 0; font-size: clamp(21px, 6.6vw, 31px); line-height: 1.08; }
   .hero-media { object-position: 61% center; }

@@ -1,53 +1,45 @@
-# Design QA — natural paper-content flow
+# Design QA — cover title spacing and vertical position
 
 ## Comparison target
 
-- Source visual truth: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-affiliation-notes-inline-final.png`
-- User-directed changes: remove `Research paper · CoRL 2026`, stop treating the paper metadata as a vertically centered second screen, and let all following sections continue in normal document flow.
+- Source visual truth: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\video-overlay-final-hero.png`
+- User-directed changes: halve the distance between the main title and subtitle, then move the full title group slightly downward.
 - Implementation URL: `http://127.0.0.1:4173/`
-- Implementation screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-natural-flow-final.png`
-- Mobile screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-natural-flow-mobile.png`
+- Implementation screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\cover-spacing-lower-final.png`
+- Mobile screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\cover-spacing-lower-mobile.png`
 - Viewports: 1440 × 900 desktop and a fixed 390 × 844 mobile frame
-- State: light theme, scrolled to the handoff from the hero into paper metadata
+- State: light theme, hero at the top of the page
 
 ## Full-view comparison evidence
 
-- Combined comparison: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-natural-flow-comparison.png`
-- The left panel shows the previous full-screen, centered metadata presentation with the kicker; the right panel shows the metadata entering as a left-aligned normal-flow section immediately after the hero transition.
-- The source and implementation intentionally use different scroll crops to expose the requested structural change.
-
-## Focused region comparison evidence
-
-- No additional crop was needed: the combined view clearly shows removal of the kicker, the new top-aligned flow, and the retained content hierarchy.
-- The mobile capture verifies the same natural flow without horizontal overflow.
+- Combined comparison: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\cover-spacing-lower-comparison.png`
+- The left panel is the earlier hero state; the right panel shows the tighter title/subtitle spacing and the slightly lower title group.
+- State mismatch note: the earlier source uses the prior narrower title measure and therefore wraps the subtitle to three lines. The implementation preserves the current 1600 px title measure and two-line wrap; that pre-existing change is outside this spacing adjustment.
 
 ## Findings
 
 - No actionable P0, P1, or P2 findings remain.
-- The paper metadata section no longer has a viewport-height minimum, vertical centering, or negative overlap margin.
-- The subsequent Highlight section follows the metadata section in ordinary document flow.
+- The title group is still visually centered, readable over the video, and fully contained at both tested viewport sizes.
+- The reduced gap is clear without making the two title lines feel crowded.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: the paper title, author list, affiliations, and buttons preserve their current typography; only the kicker is removed.
-- Spacing and layout rhythm: paper metadata now uses regular section padding instead of a dedicated 100svh stage; desktop padding is 56–84 px above and 64–96 px below.
-- Colors and visual tokens: unchanged.
-- Image quality and asset fidelity: the supplied hero video and background treatment remain unchanged.
-- Copy and content: `Research paper · CoRL 2026` is removed; the complete title, authors, affiliations, resources, and venue remain.
+- Fonts and typography: unchanged; only the vertical gap between the existing title elements was adjusted.
+- Desktop spacing: title gap changed from `clamp(30px, 4vh, 44px)` to `clamp(15px, 2vh, 22px)`; hero top padding changed from `clamp(142px, 16vh, 190px)` to `clamp(172px, 19vh, 220px)`.
+- Mobile spacing: title gap changed from `24px` to `12px`; hero-copy top padding changed from `clamp(128px, 17vh, 156px)` to `clamp(148px, 19vh, 176px)`.
+- Colors, video treatment, copy, and responsive title width: unchanged.
 
-## Patches made since the previous QA pass
+## Patches made
 
-- Removed the paper-intro kicker element and its styling.
-- Changed the paper metadata section from `min-height: 100svh` and centered flex layout to a normal block section with no minimum height.
-- Removed the negative top margin that made the metadata act as a separate overlapping screen.
-- Shortened the sticky hero scroll runway from 150svh to 118svh so the natural-flow content follows promptly while keeping a smooth fade.
-- Applied the same normal-flow behavior on mobile.
+- Halved the desktop and mobile title/subtitle gaps.
+- Shifted the complete title group downward with responsive desktop and mobile top padding.
+- Updated the stylesheet cache key so browsers load the revised CSS immediately.
 
 ## Implementation checklist
 
-- Desktop hero-to-content handoff checked at 1440 × 900.
-- Mobile handoff checked at 390 × 844.
-- No blank page, overlap, clipping, or horizontal overflow remains.
+- Desktop hero checked at 1440 × 900.
+- Mobile hero checked at 390 × 844.
+- No clipping, overlap, or horizontal overflow observed.
 - JavaScript syntax, HTTP delivery, and whitespace validation checked.
 - No P0/P1/P2 findings remain.
 
