@@ -1682,8 +1682,8 @@ body { color: #162338; }
 .data-efficiency-legend .is-cotrain::after { border: 0; background: linear-gradient(45deg, transparent 42%, currentColor 43% 57%, transparent 58%), linear-gradient(-45deg, transparent 42%, currentColor 43% 57%, transparent 58%); }
 .data-efficiency-legend .is-pretrain { --series-color: #fdbe76; }
 .data-efficiency-legend .is-pretrain::after { border-radius: 1px; transform: rotate(45deg); }
-.data-efficiency-chart-scroller { overflow-x: auto; padding: 2px 0 8px; }
-.data-efficiency-chart { min-width: 900px; }
+.data-efficiency-chart-scroller { width: 100%; overflow: hidden; padding: 2px 0 8px; }
+.data-efficiency-chart { width: 100%; min-width: 0; }
 .data-efficiency-chart svg { display: block; width: 100%; height: auto; }
 .data-efficiency-series { transition: opacity 180ms ease; }
 .data-efficiency-series.is-muted { opacity: .13; }

@@ -1,43 +1,5 @@
-dynamic environments remain a major challenge
-for visual inertial orientation
-moving pedestrians
-vehicles and frequent occlusions
-can easily corrupt feature tracking
-and cause severe drift
-to address this problem we propose STAG-VIO
-a stabilized prompt geometry interface for robust
-dynamic VIO
-STAG-VIO consists of three stages
-track to prompt
-which stabilizes object prompts through uncertainty
-Adaptive Multi object Tracking
-prompt to mask
-which generates category agnostic
-dynamic masks with promptable segmentation
-and mask to geometry
-which filters dynamic features
-and redistributes static constraints
-for reliable VIO optimization
-this significantly improves robustness
-in highly dynamic scenes
-where naive prompt
-based segmentation often fails
-our ablation study shows that prompt
-stabilization is the most important component
-reducing trajectory error by up to 83%
-compared with seven baselines across 12 settings
-STAG VIO achieves the lowest RMSE in eight settings
-the advantage is most evident in highly dynamic scenes
-where our method ranks first
-in all three high dynamic cases
-these results further confirm the robustness of STAG-VIO
-under heavy motion and occlusion
-we further validate the system on a real mobile robot
-in complex urban traffic
-with pedestrians cars
-buses and motorcycles
-in this real world experiment
-STAG-VIO reduces RMSE by 57.9%
-while producing trajectories
-that align much more closely with the true path
-thank you for watching
+DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations
+
+Rui Zhou, Yibo Yuan, Junkai Zhao, Fangyuan Zhao, Xiaoguang Zhao, Shanghang Zhang, Sirui Han
+
+Mobile bimanual dexterous manipulation requires continuous coordination of locomotion, whole-body motion, and finger-level dexterity within a single trajectory, creating a severe robot demonstration bottleneck. Egocentric human demonstrations offer a scalable alternative, but prior approaches ease the transfer by simplifying human motion, discarding exactly the fine-grained, coupled structure such tasks depend on. We present DexRoam, a complete system for learning mobile bimanual dexterous manipulation from human demonstrations, in which whole-body motion remains continuous and coupled throughout the human-to-robot transfer process. To enable scalable collection of whole-body human manipulation demonstrations, we develop a tracker-free capture system using only a consumer VR headset and a head-mounted stereo camera, without external cameras or motion trackers. We then perform three explicit alignment stages—embodiment, action-semantic, and temporal—to map captured motion into the robot action space, preserving fine-grained whole-body motion and allowing human and robot demonstrations to be jointly learned by standard VLA policies. Real-world experiments with different VLA backbones show that human demonstrations consistently improve policy learning across training paradigms, raising average success from 29% to 56% on GR00T N1.7 and from 32% to 57% on π0.5, while matching robot-only training with half the robot demonstrations. Ablations confirm that each alignment stage is necessary. These results highlight the potential of human demonstrations for scalable whole-body mobile manipulation with preserved fine-grained motion structure.
