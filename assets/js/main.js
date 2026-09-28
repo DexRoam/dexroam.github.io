@@ -39,15 +39,30 @@
 
   const header = $('[data-header]');
   const progress = $('.scroll-progress span');
+  const hero = $('[data-hero]');
+  const heroSticky = $('[data-hero-sticky]');
+
+  let scrollFrame = null;
+  const updateHeroTransition = () => {
+    scrollFrame = null;
+    if (!hero || !heroSticky) return;
+    const transitionDistance = Math.max(hero.offsetHeight - window.innerHeight, 1);
+    const heroProgress = Math.min(Math.max(window.scrollY / transitionDistance, 0), 1);
+    heroSticky.style.setProperty('--hero-progress', reducedMotion ? 0 : heroProgress.toFixed(4));
+  };
 
   const updateScrollUI = () => {
     const scrollable = document.documentElement.scrollHeight - window.innerHeight;
     const ratio = scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0;
     progress.style.transform = `scaleX(${ratio})`;
-    header.classList.toggle('is-scrolled', window.scrollY > 16);
+    const headerThreshold = hero ? Math.max(hero.offsetHeight - window.innerHeight * .35, 48) : 48;
+    header.classList.toggle('is-scrolled', window.scrollY > headerThreshold);
+    if (scrollFrame === null) scrollFrame = requestAnimationFrame(updateHeroTransition);
   };
   updateScrollUI();
+  updateHeroTransition();
   window.addEventListener('scroll', updateScrollUI, { passive: true });
+  window.addEventListener('resize', updateHeroTransition, { passive: true });
 
   const menuButton = $('.menu-toggle');
   const menu = $('#site-menu');

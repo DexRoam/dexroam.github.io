@@ -1,69 +1,54 @@
-# Design QA — DexRoam title option 2
+# Design QA — natural paper-content flow
 
 ## Comparison target
 
-- Source visual truth: `C:\Users\29491\.codex\generated_images\01a09653-5394-7df2-a5bf-b9d40915bf0c\exec-d19d4094-8134-4054-afde-538c6c557248.png`
-- Implementation URL: `http://127.0.0.1:8000/#top`
-- Light implementation screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-light.png`
-- Dark implementation screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-dark.png`
-- Rounded-Dex verification screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-rounded-dex.png`
-- Final Fredoka verification screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-fredoka-light.png`
-- Balanced-weight light screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-balanced-light.png`
-- Balanced-weight dark screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-balanced-dark.png`
-- Larger author and affiliation screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-larger-authors.png`
-- Numbered affiliation verification screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-numbered-affiliations-fresh.png`
-- Mobile title check: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\implementation-mobile-dark.png`
-- Viewport: 1440 × 900 desktop; 390 × 844 focused mobile check
-- State: top of page, navigation closed, light and dark themes
+- Source visual truth: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-affiliation-notes-inline-final.png`
+- User-directed changes: remove `Research paper · CoRL 2026`, stop treating the paper metadata as a vertically centered second screen, and let all following sections continue in normal document flow.
+- Implementation URL: `http://127.0.0.1:4173/`
+- Implementation screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-natural-flow-final.png`
+- Mobile screenshot: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-natural-flow-mobile.png`
+- Viewports: 1440 × 900 desktop and a fixed 390 × 844 mobile frame
+- State: light theme, scrolled to the handoff from the hero into paper metadata
 
 ## Full-view comparison evidence
 
-- Combined comparison: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\comparison-full.png`
-- The implementation preserves the existing hero structure and exact paper content while matching the selected concept's rounded `Dex` plus flowing cobalt `Roam` hierarchy.
-- The title remains the dominant hero element without displacing authors, actions, navigation, or the first-screen blue horizon.
+- Combined comparison: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\paper-natural-flow-comparison.png`
+- The left panel shows the previous full-screen, centered metadata presentation with the kicker; the right panel shows the metadata entering as a left-aligned normal-flow section immediately after the hero transition.
+- The source and implementation intentionally use different scroll crops to expose the requested structural change.
 
 ## Focused region comparison evidence
 
-- Focused title comparison: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\comparison-title.png`
-- Final focused comparison: `E:\Project\ProjectWebsite\dexroam.github.io.git\qa\title-option-2\comparison-fredoka.png`
-- `Dex` uses the explicitly rounded Fredoka family and `Roam` uses a restrained Courgette script. Their baseline, optical height, color transition, and apparent stroke mass read as one wordmark.
-- A focused crop is sufficient because this change affects typography only and introduces no new image asset or control.
+- No additional crop was needed: the combined view clearly shows removal of the kicker, the new top-aligned flow, and the retained content hierarchy.
+- The mobile capture verifies the same natural flow without horizontal overflow.
 
 ## Findings
 
-- No actionable P0, P1, or P2 mismatches remain in the title treatment.
-- The live page intentionally retains its existing subtitle wrap, real author block, buttons, navigation, and hero proportions instead of copying the concept image's placeholder content.
+- No actionable P0, P1, or P2 findings remain.
+- The paper metadata section no longer has a viewport-height minimum, vertical centering, or negative overlap margin.
+- The subsequent Highlight section follows the metadata section in ordinary document flow.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: Fredoka 600 gives `Dex` visibly rounded terminals without overpowering Courgette 400 `Roam`. Responsive sizing keeps the wordmark inside the mobile viewport.
-- Spacing and layout rhythm: the two spans share a baseline with a small negative handoff gap; the existing hero rhythm remains unchanged.
-- Colors and visual tokens: light mode uses black plus the selected concept's saturated cobalt `#1262f3`; dark mode uses the existing near-white foreground plus `#6f9eff` for contrast.
-- Image quality and asset fidelity: no rasterized title, placeholder, SVG approximation, or generated asset is used in production; the wordmark remains selectable HTML text.
-- Copy and content: `DexRoam`, the exact paper title, author list, affiliations, and actions are unchanged.
+- Fonts and typography: the paper title, author list, affiliations, and buttons preserve their current typography; only the kicker is removed.
+- Spacing and layout rhythm: paper metadata now uses regular section padding instead of a dedicated 100svh stage; desktop padding is 56–84 px above and 64–96 px below.
+- Colors and visual tokens: unchanged.
+- Image quality and asset fidelity: the supplied hero video and background treatment remain unchanged.
+- Copy and content: `Research paper · CoRL 2026` is removed; the complete title, authors, affiliations, resources, and venue remain.
 
-## Patches made
+## Patches made since the previous QA pass
 
-- Loaded the free Courgette and Fredoka web fonts.
-- Replaced Nunito with Fredoka 700 after the user's rendered screenshot showed that Nunito remained too conventional and angular relative to the selected concept.
-- Reduced Fredoka from 700 to 600 and relaxed its tracking so `Dex` and `Roam` have closer visual weight.
-- Corrected the light-theme `Roam` color from deep navy to the brighter cobalt used by the selected concept.
-- Increased the desktop author line from 15px to 17px and affiliations from 12px to 14px; mobile uses 14px and 11px respectively. The smaller contribution note retains its supporting hierarchy.
-- Replaced the abbreviated institution string with the paper's five numbered affiliations, added the corresponding affiliation indices to every author, and matched the contribution-note size to the affiliation size at desktop and mobile breakpoints.
-- Rebuilt the two-part title styling around the selected rounded-sans/script direction.
-- Replaced the former artificial italic/skew treatment with the natural Courgette letterforms and a restrained hover shift.
-- Added a brighter dark-theme `Roam` color.
-- Reduced and constrained the mobile wordmark so it does not overflow the viewport.
+- Removed the paper-intro kicker element and its styling.
+- Changed the paper metadata section from `min-height: 100svh` and centered flex layout to a normal block section with no minimum height.
+- Removed the negative top margin that made the metadata act as a separate overlapping screen.
+- Shortened the sticky hero scroll runway from 150svh to 118svh so the natural-flow content follows promptly while keeping a smooth fade.
+- Applied the same normal-flow behavior on mobile.
 
 ## Implementation checklist
 
-- Desktop light theme checked.
-- Desktop dark theme checked.
-- Mobile title containment checked.
-- HTML/CSS diff validation passed.
-
-## Follow-up polish
-
-- P3: after viewing in the user's normal browser, the `Roam` size can be moved by roughly ±3% if a slightly calmer or more expressive script balance is preferred.
+- Desktop hero-to-content handoff checked at 1440 × 900.
+- Mobile handoff checked at 390 × 844.
+- No blank page, overlap, clipping, or horizontal overflow remains.
+- JavaScript syntax, HTTP delivery, and whitespace validation checked.
+- No P0/P1/P2 findings remain.
 
 final result: passed

@@ -22,9 +22,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courgette&family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=20260928-11">
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260928-22">
   <script defer src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
-  <script defer src="assets/js/main.js?v=20260928-3"></script>
+  <script defer src="assets/js/main.js?v=20260928-4"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -69,13 +69,25 @@
   </aside>
 
   <main id="main-content">
-    <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="hero-orb" aria-hidden="true"></div>
-      <div class="shell hero-copy">
-        <h1 id="hero-title" class="reveal" aria-label="DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations">
-          <span class="hero-title-name"><span class="hero-title-dex">Dex</span><span class="hero-title-roam">Roam</span></span>
-          <span class="hero-title-subtitle">Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations</span>
-        </h1>
+    <section class="hero" id="top" aria-labelledby="hero-title" data-hero>
+      <div class="hero-sticky" data-hero-sticky>
+        <div class="hero-orb" aria-hidden="true"></div>
+        <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+          <source src="assets/video/Front_Page_web.mp4" type="video/mp4">
+          <source src="assets/video/Front_Page.mp4" type="video/mp4">
+        </video>
+        <div class="hero-copy">
+          <h1 id="hero-title" class="reveal" aria-label="DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations">
+            <span class="hero-title-name"><span class="hero-title-dex">Dex</span><span class="hero-title-roam">Roam</span></span>
+            <span class="hero-title-subtitle">Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations</span>
+          </h1>
+        </div>
+      </div>
+    </section>
+
+    <section class="paper-intro" id="paper-overview" aria-labelledby="paper-title">
+      <div class="shell paper-intro-shell">
+        <h2 id="paper-title" class="reveal">DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations</h2>
 
         <div class="hero-authors reveal">
           <p class="hero-author-list">
@@ -90,25 +102,28 @@
           <p class="hero-affiliations">
             <span><sup>1</sup>The Hong Kong University of Science and Technology</span>
             <span><sup>2</sup>Beijing Academy of Artificial Intelligence</span>
-            <span class="hero-affiliation-wide"><sup>3</sup>State Key Laboratory of Multimedia Information Processing, School of Computer Science, Peking University</span>
+            <span class="hero-affiliation-wide"><sup>3</sup>School of Computer Science, Peking University</span>
             <span><sup>4</sup>Beihang University</span>
             <span><sup>5</sup>Institute of Automation, Chinese Academy of Sciences</span>
+            <span><sup>*</sup> Equal contribution</span>
+            <span><sup>†</sup> Project Leader</span>
+            <span><sup>✉</sup> Corresponding authors</span>
           </p>
-          <p class="hero-author-note"><span><sup>*</sup> Equal contribution</span><span><sup>†</sup> Project Leader</span><span><sup>✉</sup> Corresponding authors</span></p>
         </div>
+
+        <p class="hero-venue reveal"><span>Paper accepted to</span> <strong>CoRL 2026</strong></p>
 
         <div class="hero-actions reveal">
           <!-- Replace this local fallback with the public arXiv abstract URL once available. -->
           <a class="button button-quiet resource-button resource-button--arxiv" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer"><iconify-icon icon="simple-icons:arxiv" aria-hidden="true"></iconify-icon><span>Arxiv</span></a>
           <a class="button button-quiet resource-button resource-button--paper" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer"><iconify-icon icon="mdi:file-pdf-box" aria-hidden="true"></iconify-icon><span>Paper</span></a>
           <a class="button button-quiet resource-button resource-button--video" href="#highlights"><iconify-icon icon="mdi:play-circle-outline" aria-hidden="true"></iconify-icon><span>Video</span></a>
-          <a class="button button-quiet resource-button resource-button--github" href="https://github.com/DexRoam" target="_blank" rel="noreferrer"><iconify-icon icon="simple-icons:github" aria-hidden="true"></iconify-icon><span>Data Collection &amp; Alignment Code</span></a>
-          <a class="button button-quiet resource-button resource-button--github" href="https://github.com/DexRoam" target="_blank" rel="noreferrer"><iconify-icon icon="simple-icons:github" aria-hidden="true"></iconify-icon><span>VLA Training Code</span></a>
+          <a class="button button-quiet resource-button resource-button--github" href="https://github.com/DexRoam" target="_blank" rel="noreferrer"><iconify-icon icon="simple-icons:github" aria-hidden="true"></iconify-icon><span>Ego Data &amp; Alignment Code</span></a>
+          <a class="button button-quiet resource-button resource-button--github" href="https://github.com/DexRoam" target="_blank" rel="noreferrer"><iconify-icon icon="simple-icons:github" aria-hidden="true"></iconify-icon><span>Policy Training Code</span></a>
           <a class="button button-quiet resource-button resource-button--huggingface" href="https://huggingface.co/datasets/zhourui9813/DexRoam_Realworld_Data" target="_blank" rel="noreferrer"><iconify-icon icon="simple-icons:huggingface" aria-hidden="true"></iconify-icon><span>Hugging Face</span></a>
           <a class="button button-quiet resource-button resource-button--hardware" href="https://docs.google.com/document/d/1fHvN4iPmd4ubBjKe_wXvZgA8-xidLD2B3mQOxtPLVF0/edit?tab=t.0#heading=h.qu6rzoh5te7b" target="_blank" rel="noreferrer"><iconify-icon icon="mdi:tools" aria-hidden="true"></iconify-icon><span>Hardware Guide</span></a>
         </div>
 
-        <p class="hero-venue"><span>Paper accepted to</span> <strong>CoRL 2026</strong></p>
       </div>
     </section>
 
