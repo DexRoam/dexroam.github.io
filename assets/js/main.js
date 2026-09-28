@@ -76,6 +76,12 @@
   $$('.nav-menu a').forEach((link) => link.addEventListener('click', () => setMenu(false)));
   window.addEventListener('resize', () => { if (window.innerWidth > 760) setMenu(false); });
 
+  const relatedResearch = $('.nav-related');
+  document.addEventListener('click', (event) => {
+    if (relatedResearch?.open && !relatedResearch.contains(event.target)) relatedResearch.open = false;
+  });
+  relatedResearch?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { relatedResearch.open = false; }));
+
   if (!reducedMotion && 'IntersectionObserver' in window) {
     const revealObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {

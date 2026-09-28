@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courgette&family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=20260928-22">
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260929-1">
   <script defer src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
   <script defer src="assets/js/main.js?v=20260928-4"></script>
 </head>
@@ -33,8 +33,7 @@
   <header class="site-header" data-header>
     <nav class="nav shell" aria-label="Primary navigation">
       <a class="brand" href="#top" aria-label="DexRoam home">
-        <span class="brand-word">DexRoam</span>
-        <span class="brand-index">01</span>
+        <span class="brand-word"><span class="brand-dex">Dex</span><span class="brand-roam">Roam</span></span>
       </a>
 
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
@@ -44,13 +43,21 @@
       <div class="nav-menu" id="site-menu">
         <div class="nav-links">
           <a href="#highlights">Overview</a>
-          <a href="#method">Method</a>
+          <a href="#capture">Data Collection</a>
+          <a href="#method">Alignment</a>
           <a href="#results">Results</a>
         </div>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
           <span data-theme-label>Dark</span>
         </button>
-        <a class="nav-paper" href="assets/paper/dexroam.pdf" target="_blank" rel="noreferrer">Read paper</a>
+        <details class="nav-related">
+          <summary class="nav-paper">Related Research</summary>
+          <div class="nav-related-menu">
+            <a href="https://motiontrans.github.io/" target="_blank" rel="noreferrer">MotionTrans</a>
+            <a href="https://opendrivelab.com/EgoHumanoid/" target="_blank" rel="noreferrer">EgoHumanoid</a>
+            <a href="https://ego-moma.github.io/" target="_blank" rel="noreferrer">EMMA</a>
+          </div>
+        </details>
       </div>
     </nav>
   </header>
