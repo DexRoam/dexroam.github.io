@@ -9,6 +9,7 @@
   <meta property="og:description" content="Continuous, coupled human-to-robot transfer for whole-body mobile manipulation.">
   <meta property="og:image" content="assets/images/dexroam-overview.png">
   <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="assets/images/dexroam-favicon.png">
   <title>DexRoam: Learning Mobile Bimanual Dexterous Manipulation from Egocentric Whole-Body Human Demonstrations</title>
   <script>
     (() => {
@@ -21,9 +22,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courgette&family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260928-11">
   <script defer src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
-  <script defer src="assets/js/main.js"></script>
+  <script defer src="assets/js/main.js?v=20260928-3"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -106,6 +107,8 @@
           <a class="button button-quiet resource-button resource-button--huggingface" href="https://huggingface.co/datasets/zhourui9813/DexRoam_Realworld_Data" target="_blank" rel="noreferrer"><iconify-icon icon="simple-icons:huggingface" aria-hidden="true"></iconify-icon><span>Hugging Face</span></a>
           <a class="button button-quiet resource-button resource-button--hardware" href="https://docs.google.com/document/d/1fHvN4iPmd4ubBjKe_wXvZgA8-xidLD2B3mQOxtPLVF0/edit?tab=t.0#heading=h.qu6rzoh5te7b" target="_blank" rel="noreferrer"><iconify-icon icon="mdi:tools" aria-hidden="true"></iconify-icon><span>Hardware Guide</span></a>
         </div>
+
+        <p class="hero-venue"><span>Paper accepted to</span> <strong>CoRL 2026</strong></p>
       </div>
     </section>
 
@@ -113,7 +116,7 @@
       <div class="shell demo-video-shell reveal">
         <div class="highlight-statement">
           <h2 class="highlight-title" id="highlights-title">Research <em>Highlight</em></h2>
-          <p>Mobile bimanual dexterous manipulation requires continuous coordination of locomotion, whole-body motion, and finger-level dexterity, creating a severe robot demonstration bottleneck. <strong>DexRoam</strong> is a complete system for learning such behaviors from egocentric whole-body human demonstrations. To preserve the fine-grained structure of human motion, we perform three explicit alignment stages — <strong>embodiment</strong>, <strong>action-semantic</strong>, and <strong>temporal</strong> — transforming human motion into continuous, coupled robot-compatible action supervision for standard VLA policies. To make collection scalable, DexRoam further provides a <span class="highlight-underline">tracker-free capture system</span> using only a consumer VR headset and a head-mounted stereo camera, without external cameras or motion trackers.</p>
+          <p>DexRoam unlocks motion-level human data for mobile bimanual dexterous manipulation by transforming egocentric whole-body demonstrations into a continuous, coupled, robot-compatible action space. It provides a complete pipeline spanning tracker-free egocentric human motion capture, whole-body human-to-robot alignment, temporal action transformation, and VLA-based policy learning, enabling scalable and data-efficient robot learning from diverse human demonstrations while reducing the reliance on costly robot teleoperation data.</p>
           <p>Across five real-world tasks and two VLA backbones, aligned human demonstrations raise average success from <strong>29% to 56%</strong> on GR00T N1.7 and from <strong>32% to 57%</strong> on &pi;<sub>0.5</sub>, while matching robot-only training with <span class="highlight-underline">50% fewer robot demonstrations</span>.</p>
         </div>
 
