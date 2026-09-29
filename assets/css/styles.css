@@ -2255,6 +2255,14 @@ html[data-theme="dark"] .button-dark { color: #080d17; border-color: #eef4ff; ba
 html[data-theme="dark"] .button-dark:hover { color: #fff; border-color: #3568d4; background: #3568d4; }
 html[data-theme="dark"] .button-quiet { color: #e7eefb; border-color: rgba(158, 180, 220, .34); background: rgba(12, 19, 33, .72); }
 
+html[data-theme="dark"] .citation-section { color: #e7eefb; background: #080d17; }
+html[data-theme="dark"] .citation-layout,
+html[data-theme="dark"] .citation-copy,
+html[data-theme="dark"] .code-toolbar { border-color: rgba(128, 161, 226, .2); }
+html[data-theme="dark"] .citation-code { background: #0c1321; }
+html[data-theme="dark"] .citation-code pre { color: #d7e2f2; }
+html[data-theme="dark"] .code-toolbar button { color: #8db0ff; border-color: rgba(128, 161, 226, .3); background: #0c1321; }
+
 html[data-theme="dark"] .policy-results-panel,
 html[data-theme="dark"] .data-efficiency-panel {
   border-color: rgba(128, 161, 226, .2);
@@ -2723,4 +2731,61 @@ html[data-theme="dark"] .nav-related-menu a:focus-visible {
   }
   .nav-related-menu a { white-space: normal; }
   html[data-theme="dark"] .nav-related-menu { background: #101a2b; }
+}
+
+/* Simple citation block */
+.citation-section {
+  padding-block: 82px;
+  color: #162338;
+  background: var(--white);
+}
+
+.citation-card {
+  padding: 30px 32px 32px;
+  overflow: hidden;
+  border: 1px solid #dbe5f6;
+  border-radius: 18px;
+  background: #eef3ff;
+}
+
+.citation-card h2 {
+  margin: 0 0 18px;
+  color: #2555bd;
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.citation-card pre {
+  margin: 0;
+  overflow-x: auto;
+  color: #30435f;
+  font-family: var(--mono);
+  font-size: clamp(11px, 1.05vw, 14px);
+  line-height: 1.65;
+  white-space: pre;
+}
+
+.citation-card code { font: inherit; }
+
+html[data-theme="dark"] .citation-section {
+  color: #e7eefb;
+  background: #080d17;
+}
+
+html[data-theme="dark"] .citation-card {
+  border-color: rgba(128, 161, 226, .2);
+  background: #101a2b;
+}
+
+html[data-theme="dark"] .citation-card h2 { color: #80a8ff; }
+html[data-theme="dark"] .citation-card pre { color: #c9d5e8; }
+
+@media (max-width: 760px) {
+  .citation-section { padding-block: 58px; }
+  .citation-card { padding: 22px 20px 24px; border-radius: 14px; }
+  .citation-card h2 { margin-bottom: 14px; font-size: 14px; }
+  .citation-card pre { font-size: 10px; line-height: 1.6; }
 }
